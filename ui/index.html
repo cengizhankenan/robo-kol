@@ -1,0 +1,1576 @@
+<meta charset="utf-8">
+<title>Robokol Kaynak Konsolu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============================================================
+   ROBOKOL — Sualtı Kaynak Operasyon Konsolu
+   Tek dünya (karanlık dalış konsolu) — tema takası yok, her
+   renk açıkça boyanır.
+   ============================================================ */
+:root{
+  color-scheme: dark;
+
+  --abyss:#060C10;      /* sayfa zemini */
+  --hull:#0D1720;       /* panel yüzeyi */
+  --hull-2:#131F29;     /* yükseltilmiş yüzey */
+  --hull-3:#1B2B36;     /* satır hover */
+  --rule:#213340;
+  --rule-2:#2D4453;
+
+  --ink:#E8F1F5;
+  --ink-2:#94A9B4;
+  --ink-3:#5F7885;
+
+  --arc:#FF8A1F;        /* vurgu: kaynak arkı */
+  --arc-2:#FFB162;
+  --arc-dim:#5C3410;
+  --deep:#5CB8E8;       /* su / telemetri */
+  --deep-dim:#1E3E52;
+
+  --ok:#3FCF8E;
+  --warn:#FFD24A;
+  --crit:#FF5F52;
+
+  --sans:"Barlow Semi Condensed","Barlow",system-ui,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+  --r:3px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--abyss);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.35;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--arc);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ---------- ortak parçalar ---------- */
+.card{
+  background:var(--hull);
+  border:1px solid var(--rule);
+  border-radius:var(--r);
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+.card-hd{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;
+  border-bottom:1px solid var(--rule);
+  background:var(--hull-2);
+  flex:none;
+}
+.card-hd h2{
+  margin:0;
+  font-size:11px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-2);
+}
+.card-hd .hd-note{
+  margin-left:auto;
+  font-family:var(--mono);font-size:10px;
+  color:var(--ink-3);letter-spacing:.04em;
+}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.u{font-size:.72em;color:var(--ink-3);margin-left:2px;font-family:var(--sans);letter-spacing:.02em}
+
+/* durum rozeti */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 8px;
+  border:1px solid var(--rule-2);
+  border-radius:100px;
+  font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-2);
+  white-space:nowrap;
+}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex:none}
+.chip[data-s="ok"]{color:var(--ok);border-color:#1F5A42}
+.chip[data-s="ok"] .dot{background:var(--ok)}
+.chip[data-s="warn"]{color:var(--warn);border-color:#5C4A12}
+.chip[data-s="warn"] .dot{background:var(--warn)}
+.chip[data-s="crit"]{color:var(--crit);border-color:#5E211D;background:#24100F}
+.chip[data-s="crit"] .dot{background:var(--crit)}
+.chip[data-s="arc"]{color:var(--arc);border-color:var(--arc-dim);background:#1D1108}
+.chip[data-s="arc"] .dot{background:var(--arc);box-shadow:0 0 8px var(--arc)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.live .dot{animation:pulse 1.1s ease-in-out infinite}
+
+/* ============================================================
+   KABUK
+   ============================================================ */
+.app{
+  height:100dvh;min-height:660px;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:8px;
+  padding:8px;
+}
+
+/* ---------- üst çubuk ---------- */
+.topbar{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:16px;
+  background:var(--hull);
+  border:1px solid var(--rule);
+  border-radius:var(--r);
+  padding:8px 12px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.brand-txt{min-width:0}
+.brand-name{
+  font-size:17px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
+  line-height:1;
+}
+.brand-name b{color:var(--arc);font-weight:700}
+.brand-sub{
+  font-size:11px;color:var(--ink-3);
+  letter-spacing:.1em;text-transform:uppercase;
+  margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* mod sekmeleri */
+.modes{
+  display:flex;
+  background:var(--abyss);
+  border:1px solid var(--rule-2);
+  border-radius:var(--r);
+  padding:3px;
+  gap:3px;
+}
+.mode{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 20px;
+  border-radius:2px;
+  font-size:12px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);
+  transition:color .15s,background .15s;
+}
+.mode:hover{color:var(--ink-2);background:var(--hull-2)}
+.mode .led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--rule-2);
+  transition:background .15s,box-shadow .15s;
+}
+.mode[aria-selected="true"]{
+  background:var(--hull-3);
+  color:var(--ink);
+  box-shadow:inset 0 -2px 0 var(--arc);
+}
+.mode[aria-selected="true"] .led{background:var(--arc);box-shadow:0 0 8px var(--arc)}
+
+.topstat{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.estop{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 14px;
+  background:#2A0F0D;
+  border:1px solid #7A2A24;
+  border-radius:var(--r);
+  color:#FF8078;
+  font-size:12px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  transition:background .12s,color .12s,border-color .12s;
+}
+.estop:hover{background:#3D1512;color:#FFA79F}
+.estop::before{
+  content:"";width:9px;height:9px;border-radius:50%;
+  background:var(--crit);box-shadow:0 0 0 3px rgba(255,95,82,.15);
+}
+.estop[data-fired="true"]{background:var(--crit);border-color:var(--crit);color:#1A0605}
+.estop[data-fired="true"]::before{background:#1A0605;box-shadow:none}
+
+/* ---------- ana sahne ---------- */
+.stage{
+  display:grid;
+  grid-template-columns:300px minmax(0,1fr) 340px;
+  gap:8px;
+  min-height:0;
+}
+.col{display:flex;flex-direction:column;gap:8px;min-height:0}
+
+/* ============================================================
+   TORÇ SAYACI
+   ============================================================ */
+.torch{flex:none;border-color:var(--arc-dim)}
+.torch .card-hd{background:linear-gradient(180deg,#1C1209,#141A1F);border-bottom-color:var(--arc-dim)}
+.torch .card-hd h2{color:var(--arc-2)}
+.torch-body{padding:10px}
+.torch-main{display:flex;align-items:flex-end;gap:10px}
+.torch-count{
+  font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:46px;font-weight:600;line-height:.86;
+  color:var(--arc);
+  letter-spacing:-.02em;
+  text-shadow:0 0 22px rgba(255,138,31,.28);
+}
+.torch-meta{padding-bottom:3px}
+.torch-meta .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.torch-meta .v{font-family:var(--mono);font-size:13px;color:var(--ink-2);margin-top:1px}
+
+.spark{display:block;width:100%;height:32px;margin:9px 0 4px}
+
+.torch-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:1px;
+  background:var(--rule);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  overflow:hidden;
+  margin-top:8px;
+}
+.tg{background:var(--hull-2);padding:6px 8px}
+.tg .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tg .v{font-family:var(--mono);font-size:15px;font-weight:500;margin-top:2px}
+
+/* elektrot barı */
+.elec{margin-top:10px}
+.elec-hd{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.elec-hd b{font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0;font-weight:500}
+.elec-bar{display:flex;gap:2px;margin-top:5px}
+.elec-bar i{flex:1;height:9px;border-radius:1px;background:var(--rule);transition:background .2s}
+.elec-bar i.used{background:var(--arc-dim)}
+.elec-bar i.now{background:var(--arc);box-shadow:0 0 7px rgba(255,138,31,.6)}
+
+/* ============================================================
+   SENSÖRLER
+   ============================================================ */
+.sensors{flex:1 1 auto}
+.sensors-body{overflow-y:auto;padding:2px 0 6px}
+.sgrp{
+  padding:7px 10px 3px;
+  font-size:10px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);
+  display:flex;align-items:center;gap:8px;
+}
+.sgrp::after{content:"";flex:1;height:1px;background:var(--rule)}
+
+.sr{
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-areas:"lbl val" "bar bar";
+  gap:2px 8px;
+  padding:4px 10px 5px;
+  border-left:2px solid transparent;
+  transition:background .12s;
+}
+.sr:hover{background:var(--hull-2)}
+.sr-l{grid-area:lbl;font-size:12px;color:var(--ink-2);align-self:center}
+.sr-v{grid-area:val;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;font-weight:500;align-self:center}
+.sr-bar{grid-area:bar;height:3px;background:var(--rule);border-radius:2px;overflow:hidden;margin-top:3px}
+.sr-bar i{display:block;height:100%;background:var(--deep);border-radius:2px;transition:width .35s ease-out}
+.sr[data-s="warn"]{border-left-color:var(--warn);background:#1A1708}
+.sr[data-s="warn"] .sr-v{color:var(--warn)}
+.sr[data-s="warn"] .sr-bar i{background:var(--warn)}
+.sr[data-s="crit"]{border-left-color:var(--crit);background:#1E0C0B}
+.sr[data-s="crit"] .sr-v{color:var(--crit)}
+.sr[data-s="crit"] .sr-bar i{background:var(--crit)}
+.sr[data-s="arc"] .sr-bar i{background:var(--arc)}
+.srow{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:1px;background:var(--rule);
+  margin:2px 10px 7px;border:1px solid var(--rule);
+  border-radius:2px;overflow:hidden;
+}
+.sc{background:var(--hull-2);padding:5px 8px}
+.sc .k{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.sc .sr-v{display:block;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;font-weight:500;margin-top:2px}
+.sr-flag{
+  grid-area:val;justify-self:end;
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ok);
+}
+
+/* ============================================================
+   KAMERA
+   ============================================================ */
+.col-center{display:flex;flex-direction:column;gap:8px;min-height:0}
+.viewport{
+  position:relative;
+  flex:1 1 auto;
+  min-height:0;
+  background:#03080B;
+  border:1px solid var(--rule);
+  border-radius:var(--r);
+  overflow:hidden;
+}
+#feed{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud{position:absolute;inset:0;pointer-events:none}
+
+/* köşe braketleri */
+.br{position:absolute;width:22px;height:22px;border:1px solid rgba(92,184,232,.45)}
+.br.tl{top:10px;left:10px;border-right:0;border-bottom:0}
+.br.tr{top:10px;right:10px;border-left:0;border-bottom:0}
+.br.bl{bottom:10px;left:10px;border-right:0;border-top:0}
+.br.br2{bottom:10px;right:10px;border-left:0;border-top:0}
+
+.hud-top{
+  position:absolute;top:10px;left:42px;right:42px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  font-family:var(--mono);font-size:11px;
+  color:rgba(200,230,242,.82);
+  text-shadow:0 1px 3px rgba(0,0,0,.9);
+  letter-spacing:.04em;
+}
+.hud-top .cam-id{display:flex;align-items:center;gap:7px;font-weight:500}
+.rec{display:flex;align-items:center;gap:5px;color:#FF7A70}
+.rec::before{content:"";width:7px;height:7px;border-radius:50%;background:#FF5F52;animation:pulse 1.6s ease-in-out infinite}
+
+.hud-bottom{
+  position:absolute;bottom:10px;left:42px;right:42px;
+  display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
+  font-family:var(--mono);font-size:11px;
+  color:rgba(200,230,242,.8);
+  text-shadow:0 1px 3px rgba(0,0,0,.9);
+}
+.hud-read{display:flex;gap:16px;letter-spacing:.04em}
+.hud-read b{color:#fff;font-weight:500}
+.hud-read span{color:rgba(150,180,195,.75)}
+
+/* nişangah */
+.retic{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:118px;height:118px;pointer-events:none}
+.retic::before,.retic::after{content:"";position:absolute;background:rgba(92,184,232,.5)}
+.retic::before{top:50%;left:0;right:0;height:1px}
+.retic::after{left:50%;top:0;bottom:0;width:1px}
+.retic .core{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:34px;height:34px;border:1px solid rgba(92,184,232,.65);border-radius:50%;
+}
+.retic .core::after{
+  content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:3px;height:3px;background:var(--arc);border-radius:50%;
+}
+
+/* otonom tespit katmanı */
+.det{position:absolute;inset:0;pointer-events:none}
+.det-box{
+  position:absolute;
+  border:1px solid var(--arc);
+  border-radius:1px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 0 14px rgba(255,138,31,.25);
+}
+.det-box::after{
+  content:attr(data-label);
+  position:absolute;top:-17px;left:-1px;
+  background:var(--arc);color:#140902;
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  padding:1px 5px;white-space:nowrap;letter-spacing:.02em;
+}
+.det-box.sec{border-color:var(--deep);box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 14px rgba(92,184,232,.2)}
+.det-box.sec::after{background:var(--deep);color:#04141D}
+
+.ai-badge{
+  position:absolute;top:38px;left:42px;
+  display:flex;align-items:center;gap:7px;
+  padding:4px 9px;
+  background:rgba(6,12,16,.82);
+  border:1px solid var(--arc-dim);
+  border-radius:2px;
+  font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--arc);
+}
+.ai-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--arc);animation:pulse 1.1s ease-in-out infinite}
+
+/* kamera kontrol çubuğu */
+.camctl{
+  flex:none;
+  display:flex;align-items:center;gap:8px;
+  padding:7px 9px;
+  background:var(--hull);
+  border:1px solid var(--rule);
+  border-radius:var(--r);
+  overflow-x:auto;
+}
+.camtabs{display:flex;gap:2px;background:var(--abyss);border:1px solid var(--rule);border-radius:2px;padding:2px;flex:none}
+.camtab{
+  padding:5px 11px;border-radius:2px;
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);white-space:nowrap;
+}
+.camtab:hover{color:var(--ink-2);background:var(--hull-2)}
+.camtab[aria-pressed="true"]{background:var(--hull-3);color:var(--deep)}
+
+.slider{display:flex;align-items:center;gap:8px;flex:none}
+.slider label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.slider input{
+  -webkit-appearance:none;appearance:none;
+  width:96px;height:3px;border-radius:2px;background:var(--rule);
+}
+.slider input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:var(--deep);border:2px solid var(--hull);cursor:pointer;
+}
+.slider input::-moz-range-thumb{
+  width:13px;height:13px;border-radius:50%;
+  background:var(--deep);border:2px solid var(--hull);cursor:pointer;
+}
+.slider output{font-family:var(--mono);font-size:12px;color:var(--ink-2);width:34px}
+
+.camctl .sep{width:1px;height:22px;background:var(--rule);flex:none}
+.iconbtn{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 10px;
+  border:1px solid var(--rule-2);border-radius:2px;
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-2);white-space:nowrap;
+}
+.iconbtn:hover{background:var(--hull-2);color:var(--ink)}
+
+/* ============================================================
+   SAĞ PANEL — OPERATÖR GERİ BİLDİRİMİ
+   ============================================================ */
+.fb-body{overflow-y:auto;padding:10px}
+
+/* joystick pedleri */
+.pads{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pad-wrap{display:flex;flex-direction:column;gap:5px}
+.pad-cap{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+}
+.pad-cap b{font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:0;font-weight:500}
+.pad{
+  position:relative;
+  aspect-ratio:1;
+  background:
+    linear-gradient(var(--rule),var(--rule)) center/1px 100% no-repeat,
+    linear-gradient(var(--rule),var(--rule)) center/100% 1px no-repeat,
+    var(--abyss);
+  border:1px solid var(--rule-2);
+  border-radius:var(--r);
+  cursor:grab;
+  touch-action:none;
+  overflow:hidden;
+}
+.pad:active{cursor:grabbing}
+.pad::before{
+  content:"";position:absolute;top:50%;left:50%;
+  width:52%;height:52%;transform:translate(-50%,-50%);
+  border:1px dashed var(--rule-2);border-radius:50%;
+}
+/* komut (operatörün istediği) */
+.pad .cmd{
+  position:absolute;width:15px;height:15px;
+  margin:-7.5px 0 0 -7.5px;
+  border:1.5px solid var(--arc);border-radius:50%;
+  pointer-events:none;
+}
+/* gerçekleşen (kolun ulaştığı) */
+.pad .act{
+  position:absolute;width:9px;height:9px;
+  margin:-4.5px 0 0 -4.5px;
+  background:var(--deep);border-radius:50%;
+  box-shadow:0 0 10px rgba(92,184,232,.7), 0 0 0 2px var(--abyss);
+  pointer-events:none;
+}
+.pad .link{position:absolute;inset:0;pointer-events:none}
+.pad-hint{
+  position:absolute;bottom:5px;left:0;right:0;text-align:center;
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  pointer-events:none;transition:opacity .3s;
+}
+.pad.touched .pad-hint{opacity:0}
+
+/* açıklama şeridi */
+.legend{
+  display:flex;gap:14px;justify-content:center;
+  margin-top:9px;padding:6px 0;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+}
+.legend i{display:inline-flex;align-items:center;gap:6px}
+.legend i::before{content:"";width:9px;height:9px;border-radius:50%;flex:none}
+.legend .lg-cmd::before{border:1.5px solid var(--arc)}
+.legend .lg-act::before{background:var(--deep)}
+
+/* eksen karşılıkları */
+.axes{margin-top:11px;display:flex;flex-direction:column;gap:1px}
+.ax{
+  display:grid;
+  grid-template-columns:74px 1fr 52px 44px;
+  align-items:center;gap:8px;
+  padding:5px 4px;
+  border-radius:2px;
+}
+.ax:hover{background:var(--hull-2)}
+.ax-n{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ax-t{
+  position:relative;height:6px;
+  background:var(--abyss);
+  border:1px solid var(--rule);border-radius:2px;
+  overflow:hidden;
+}
+.ax-t .fill{
+  position:absolute;top:0;bottom:0;
+  background:var(--deep);border-radius:1px;
+  transition:left .12s linear,width .12s linear;
+}
+.ax-t .tgt{
+  position:absolute;top:-2px;bottom:-2px;width:2px;
+  background:var(--arc);border-radius:1px;
+  box-shadow:0 0 6px rgba(255,138,31,.7);
+  transition:left .12s linear;
+}
+.ax-v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;text-align:right}
+.ax-d{
+  font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:11px;text-align:right;color:var(--ink-3);
+}
+.ax-d[data-hot="true"]{color:var(--warn)}
+
+/* kuvvet geri bildirimi */
+.force{margin-top:11px;padding-top:10px;border-top:1px solid var(--rule)}
+.force-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.force-hd .k{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.force-hd .v{font-family:var(--mono);font-size:14px;font-weight:500}
+.force-bar{display:flex;gap:2px;height:22px}
+.force-bar i{
+  flex:1;border-radius:1px;
+  background:var(--rule);
+  transition:background .1s;
+  align-self:stretch;
+}
+.force-bar i.on{background:var(--deep)}
+.force-bar i.hi{background:var(--warn)}
+.force-bar i.max{background:var(--crit)}
+.force-meta{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin-top:9px;
+}
+.fm{background:var(--hull-2);border:1px solid var(--rule);border-radius:2px;padding:6px 8px}
+.fm .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.fm .v{font-family:var(--mono);font-size:14px;font-weight:500;margin-top:2px}
+
+/* ============================================================
+   SAĞ PANEL — OTONOM GÖREV
+   ============================================================ */
+.auto-body{overflow-y:auto;padding:10px}
+.steps{display:flex;flex-direction:column;position:relative;padding-left:2px}
+.step{
+  display:grid;grid-template-columns:22px 1fr;
+  gap:10px;
+  padding:0 0 14px;
+  position:relative;
+}
+.step:last-child{padding-bottom:0}
+.step::before{
+  content:"";position:absolute;left:10px;top:20px;bottom:0;
+  width:1px;background:var(--rule);
+}
+.step:last-child::before{display:none}
+.step-no{
+  width:21px;height:21px;border-radius:50%;
+  display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  border:1px solid var(--rule-2);
+  background:var(--hull);
+  color:var(--ink-3);
+  z-index:1;
+}
+.step-b .t{font-size:13px;color:var(--ink-2);line-height:1.25}
+.step-b .m{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:3px}
+.step[data-s="done"] .step-no{background:#0F2A20;border-color:#1F5A42;color:var(--ok)}
+.step[data-s="done"] .t{color:var(--ink-3)}
+.step[data-s="run"] .step-no{background:#1D1108;border-color:var(--arc);color:var(--arc);box-shadow:0 0 12px rgba(255,138,31,.35)}
+.step[data-s="run"] .t{color:var(--ink);font-weight:600}
+.step[data-s="run"] .m{color:var(--arc-2)}
+
+.vis{margin-top:13px;padding-top:11px;border-top:1px solid var(--rule)}
+.vis-hd{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.vis-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+.vg{background:var(--hull-2);padding:7px 9px}
+.vg .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.vg .v{font-family:var(--mono);font-size:15px;font-weight:500;margin-top:2px}
+.vg .v.ok{color:var(--ok)}
+.vg .v.acc{color:var(--arc)}
+
+.conf{margin-top:10px}
+.conf-hd{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.conf-hd b{font-family:var(--mono);font-size:13px;color:var(--ok);letter-spacing:0;font-weight:500}
+.conf-t{height:5px;background:var(--abyss);border:1px solid var(--rule);border-radius:3px;overflow:hidden;margin-top:5px}
+.conf-t i{display:block;height:100%;background:var(--ok);transition:width .4s ease-out}
+
+.takeover{
+  width:100%;margin-top:13px;
+  padding:11px;
+  background:#1D1108;
+  border:1px solid var(--arc-dim);
+  border-radius:var(--r);
+  color:var(--arc);
+  font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  transition:background .13s,border-color .13s;
+}
+.takeover:hover{background:#2B1A0C;border-color:var(--arc)}
+
+/* ============================================================
+   DURUM ÇUBUĞU / OLAY GÜNLÜĞÜ
+   ============================================================ */
+.statusbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;gap:16px;
+  background:var(--hull);
+  border:1px solid var(--rule);
+  border-radius:var(--r);
+  padding:0 12px;
+  height:34px;
+}
+.log{
+  display:flex;align-items:center;gap:10px;
+  min-width:0;
+  font-family:var(--mono);font-size:11px;
+  color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;
+}
+.log .ts{color:var(--ink-3);flex:none}
+.log .msg{overflow:hidden;text-overflow:ellipsis}
+.log .tag{
+  flex:none;padding:1px 6px;border-radius:2px;
+  font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--rule-2);color:var(--ink-3);
+  font-family:var(--sans);
+}
+.log .tag[data-t="ark"]{color:var(--arc);border-color:var(--arc-dim)}
+.log .tag[data-t="oto"]{color:var(--deep);border-color:var(--deep-dim)}
+.log .tag[data-t="uyari"]{color:var(--warn);border-color:#5C4A12}
+
+.netstat{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.netstat b{color:var(--ink-2);font-weight:500}
+
+/* ============================================================
+   DAR EKRAN
+   ============================================================ */
+@media (max-width:1180px){
+  .stage{grid-template-columns:1fr;grid-auto-rows:min-content}
+  .app{height:auto;min-height:0}
+  .viewport{aspect-ratio:16/10}
+  .topbar{grid-template-columns:1fr;justify-items:center;gap:10px}
+  .topstat{justify-content:center;flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="app">
+
+  <!-- ═══════════════ ÜST ÇUBUK ═══════════════ -->
+  <header class="topbar">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+        <circle cx="15" cy="15" r="13.5" fill="none" stroke="#213340"/>
+        <path d="M6 21 L12 21 L16 11 L20 17 L24 17" fill="none" stroke="#FF8A1F" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="24" cy="17" r="2.6" fill="#FF8A1F"/>
+        <path d="M3 8.5 Q7.5 6 12 8.5 T21 8.5 T27 8" fill="none" stroke="#5CB8E8" stroke-width="1.1" opacity=".7"/>
+      </svg>
+      <div class="brand-txt">
+        <div class="brand-name">ROBO<b>KOL</b></div>
+        <div class="brand-sub">Sualtı Kaynak Operasyon Konsolu</div>
+      </div>
+    </div>
+
+    <nav class="modes" role="tablist" aria-label="Kontrol modu">
+      <button class="mode" role="tab" id="tab-op" aria-selected="true" aria-controls="panel-op" data-mode="op">
+        <span class="led"></span>Operatör
+      </button>
+      <button class="mode" role="tab" id="tab-oto" aria-selected="false" aria-controls="panel-oto" data-mode="oto">
+        <span class="led"></span>Otonom
+      </button>
+    </nav>
+
+    <div class="topstat">
+      <span class="chip" data-s="ok" id="chip-link"><span class="dot"></span>Bağlı <span class="num" id="lat">12 ms</span></span>
+      <span class="chip live" data-s="arc" id="chip-arc"><span class="dot"></span>Ark aktif</span>
+      <button class="estop" id="estop" data-fired="false">Acil durdur</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════ ANA SAHNE ═══════════════ -->
+  <main class="stage">
+
+    <!-- ───────── SOL: torç sayacı + sensörler ───────── -->
+    <div class="col col-left">
+
+      <section class="card torch">
+        <div class="card-hd">
+          <h2>Torç Sayacı</h2>
+          <span class="hd-note" id="torch-mode">MMA · 3.2 mm</span>
+        </div>
+        <div class="torch-body">
+          <div class="torch-main">
+            <div class="torch-count num" id="arc-total">0148</div>
+            <div class="torch-meta">
+              <div class="k">Toplam ark</div>
+              <div class="v">bu dalış <span id="arc-dive">12</span></div>
+            </div>
+          </div>
+
+          <svg class="spark" id="spark" viewBox="0 0 240 32" preserveAspectRatio="none"
+               role="img" aria-label="Son 60 saniyenin kaynak akımı">
+            <defs>
+              <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#FF8A1F" stop-opacity=".34"/>
+                <stop offset="100%" stop-color="#FF8A1F" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path id="spark-area" fill="url(#sparkFill)" d=""></path>
+            <path id="spark-line" fill="none" stroke="#FF8A1F" stroke-width="1.5"
+                  stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" d=""></path>
+            <circle id="spark-end" r="2.6" fill="#FF8A1F" cx="0" cy="0"></circle>
+          </svg>
+
+          <div class="torch-grid">
+            <div class="tg"><div class="k">Ark süresi</div><div class="v num" id="arc-time">04:37</div></div>
+            <div class="tg"><div class="k">Kaynak akımı</div><div class="v num" id="arc-amp">178<span class="u">A</span></div></div>
+            <div class="tg"><div class="k">Ark voltajı</div><div class="v num" id="arc-volt">26.4<span class="u">V</span></div></div>
+            <div class="tg"><div class="k">Torç sıcaklığı</div><div class="v num" id="arc-temp">68<span class="u">°C</span></div></div>
+          </div>
+
+          <div class="elec">
+            <div class="elec-hd"><span>Elektrot</span><b><span id="elec-used">7</span> / 24</b></div>
+            <div class="elec-bar" id="elec-bar"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card sensors">
+        <div class="card-hd">
+          <h2>Sensörler</h2>
+          <span class="hd-note">10 Hz</span>
+        </div>
+        <div class="sensors-body" id="sensors"></div>
+      </section>
+
+    </div>
+
+    <!-- ───────── ORTA: kamera ───────── -->
+    <div class="col-center">
+      <div class="viewport">
+        <canvas id="feed"></canvas>
+
+        <div class="hud">
+          <span class="br tl"></span><span class="br tr"></span>
+          <span class="br bl"></span><span class="br br2"></span>
+
+          <div class="hud-top">
+            <div class="cam-id"><span id="cam-name">TORÇ KAMERASI</span> · 1080p60</div>
+            <div class="rec">KAYIT <span class="num" id="rec-time">00:12:04</span></div>
+          </div>
+
+          <div class="retic" id="retic"><span class="core"></span></div>
+
+          <div class="ai-badge" id="ai-badge" hidden>
+            <span class="dot"></span>Görüntü İşleme
+          </div>
+
+          <div class="det" id="det" hidden>
+            <div class="det-box" style="left:31%;top:44%;width:38%;height:15%" data-label="dikiş  %96"></div>
+            <div class="det-box sec" style="left:24%;top:31%;width:53%;height:41%" data-label="boru · Ø 610 mm"></div>
+            <svg style="position:absolute;inset:0;width:100%;height:100%">
+              <polyline points="0,0" id="seam-path" fill="none" stroke="#FF8A1F" stroke-width="2"
+                        stroke-dasharray="5 4" opacity=".85"/>
+            </svg>
+          </div>
+
+          <div class="hud-bottom">
+            <div class="hud-read">
+              <div><span>DER</span> <b class="num" id="hud-depth">18.4 m</b></div>
+              <div><span>YÖN</span> <b class="num" id="hud-hdg">137°</b></div>
+              <div><span>MSF</span> <b class="num" id="hud-dist">0.42 m</b></div>
+            </div>
+            <div class="hud-read">
+              <div><span>IŞIK</span> <b class="num" id="hud-light">70%</b></div>
+              <div><span>GÖRÜŞ</span> <b class="num" id="hud-vis">1.2 NTU</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="camctl">
+        <div class="camtabs" role="group" aria-label="Kamera seçimi">
+          <button class="camtab" aria-pressed="true"  data-cam="torc">Torç</button>
+          <button class="camtab" aria-pressed="false" data-cam="on">Ön</button>
+          <button class="camtab" aria-pressed="false" data-cam="alt">Alt</button>
+        </div>
+        <span class="sep"></span>
+        <div class="slider">
+          <label for="light">Işık</label>
+          <input type="range" id="light" min="0" max="100" value="70">
+          <output for="light" id="light-out" class="num">70%</output>
+        </div>
+        <span class="sep"></span>
+        <div class="slider">
+          <label for="zoom">Yakınlaştırma</label>
+          <input type="range" id="zoom" min="10" max="40" value="10">
+          <output for="zoom" id="zoom-out" class="num">1.0×</output>
+        </div>
+        <span class="sep"></span>
+        <button class="iconbtn" id="snap">Kare yakala</button>
+        <button class="iconbtn" id="markbtn">İşaret bırak</button>
+      </div>
+    </div>
+
+    <!-- ───────── SAĞ: geri bildirim / otonom görev ───────── -->
+    <div class="col col-right">
+
+      <!-- OPERATÖR MODU -->
+      <section class="card" id="panel-op" role="tabpanel" aria-labelledby="tab-op" style="flex:1 1 auto">
+        <div class="card-hd">
+          <h2>Hareket Geri Bildirimi</h2>
+          <span class="hd-note" id="fb-lat">gecikme 34 ms</span>
+        </div>
+        <div class="fb-body">
+
+          <div class="pads">
+            <div class="pad-wrap">
+              <div class="pad-cap"><span>Sol kol · X/Y</span><b id="pad-l-val">0.00 0.00</b></div>
+              <div class="pad" id="pad-l" data-axis="xy">
+                <span class="cmd"></span><span class="act"></span>
+                <span class="pad-hint">sürükle</span>
+              </div>
+            </div>
+            <div class="pad-wrap">
+              <div class="pad-cap"><span>Sağ kol · Z/Dönüş</span><b id="pad-r-val">0.00 0.00</b></div>
+              <div class="pad" id="pad-r" data-axis="zr">
+                <span class="cmd"></span><span class="act"></span>
+                <span class="pad-hint">sürükle</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="legend">
+            <i class="lg-cmd">Komut</i>
+            <i class="lg-act">Gerçekleşen</i>
+          </div>
+
+          <div class="axes" id="axes"></div>
+
+          <div class="force">
+            <div class="force-hd">
+              <span class="k">Kuvvet geri bildirimi</span>
+              <span class="v num" id="force-val">14.2<span class="u">N</span></span>
+            </div>
+            <div class="force-bar" id="force-bar"></div>
+            <div class="force-meta">
+              <div class="fm"><div class="k">Temas</div><div class="v" id="contact">YOK</div></div>
+              <div class="fm"><div class="k">Kıskaç kuvveti</div><div class="v num" id="grip">38<span class="u">%</span></div></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- OTONOM MODU -->
+      <section class="card" id="panel-oto" role="tabpanel" aria-labelledby="tab-oto" hidden style="flex:1 1 auto">
+        <div class="card-hd">
+          <h2>Otonom Görev</h2>
+          <span class="hd-note">dikis_takip v0.3</span>
+        </div>
+        <div class="auto-body">
+
+          <div class="steps">
+            <div class="step" data-s="done">
+              <div class="step-no">1</div>
+              <div class="step-b"><div class="t">Dikiş tespiti</div><div class="m">3 aday · 1 seçildi</div></div>
+            </div>
+            <div class="step" data-s="done">
+              <div class="step-no">2</div>
+              <div class="step-b"><div class="t">Torç hizalama</div><div class="m">sapma 0.8 mm · açı 63°</div></div>
+            </div>
+            <div class="step" data-s="run">
+              <div class="step-no">3</div>
+              <div class="step-b"><div class="t">Dikiş takibi</div><div class="m" id="step-run">%38 · 124 / 320 mm</div></div>
+            </div>
+            <div class="step" data-s="wait">
+              <div class="step-no">4</div>
+              <div class="step-b"><div class="t">Kalite denetimi</div><div class="m">bekliyor</div></div>
+            </div>
+            <div class="step" data-s="wait">
+              <div class="step-no">5</div>
+              <div class="step-b"><div class="t">Torç geri çekme</div><div class="m">bekliyor</div></div>
+            </div>
+          </div>
+
+          <div class="vis">
+            <div class="vis-hd">Görüntü işleme çıktısı</div>
+            <div class="vis-grid">
+              <div class="vg"><div class="k">Kare hızı</div><div class="v num" id="ai-fps">28<span class="u">fps</span></div></div>
+              <div class="vg"><div class="k">Çıkarım</div><div class="v num" id="ai-ms">34<span class="u">ms</span></div></div>
+              <div class="vg"><div class="k">Dikiş uzunluğu</div><div class="v num acc">320<span class="u">mm</span></div></div>
+              <div class="vg"><div class="k">Yanal sapma</div><div class="v num" id="ai-dev">0.8<span class="u">mm</span></div></div>
+            </div>
+
+            <div class="conf">
+              <div class="conf-hd"><span>Tespit güveni</span><b class="num" id="ai-conf">%96</b></div>
+              <div class="conf-t"><i id="conf-bar" style="width:96%"></i></div>
+            </div>
+          </div>
+
+          <button class="takeover" id="takeover">Operatöre devret</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ═══════════════ DURUM ÇUBUĞU ═══════════════ -->
+  <footer class="statusbar">
+    <div class="log">
+      <span class="ts" id="log-ts">12:04:31</span>
+      <span class="tag" id="log-tag" data-t="ark">ark</span>
+      <span class="msg" id="log-msg">Ark başlatıldı — elektrot 7, akım 178 A</span>
+    </div>
+    <div class="netstat">
+      <span>Umbilikal <b class="num" id="net-rate">18.4 Mb/s</b></span>
+      <span>Paket kaybı <b class="num" id="net-loss">0.02%</b></span>
+      <span>Çalışma <b class="num" id="uptime">01:47:22</b></span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+/* ============================================================================
+   ROBOKOL — konsol davranışı
+
+   ┌─ ROS 2 BAĞLANTI NOKTASI ────────────────────────────────────────────────┐
+   │ Tüm sayısal veri tek bir `state` nesnesinde durur ve arayüze yalnızca    │
+   │ `applyTelemetry(patch)` üzerinden girer. Şu an `SimSource` bu nesneyi    │
+   │ besliyor. ROS 2'ye geçerken yapılacak tek iş: SimSource'u kapatıp        │
+   │ aşağıdaki RosSource taslağını açmak — arayüz kodunun geri kalanı aynen   │
+   │ kalır.                                                                   │
+   │                                                                          │
+   │   /robokol/kol/durum          sensor_msgs/msg/JointState                 │
+   │   /robokol/telemetri          robokol_msgs/msg/Telemetri                 │
+   │   /robokol/kaynak/durum       robokol_msgs/msg/KaynakDurum               │
+   │   /robokol/kol/komut          geometry_msgs/msg/Twist        (yayın)     │
+   │   /robokol/mod                std_msgs/msg/String            (yayın)     │
+   │   /robokol/acil_durdur        std_srvs/srv/Trigger           (servis)    │
+   │   /robokol/kamera/torc/image_raw  → web_video_server ile <img> kaynağı   │
+   └──────────────────────────────────────────────────────────────────────────┘
+   ========================================================================== */
+
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp  = (a, b, t) => a + (b - a) * t;
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ══════════════ 1. SENSÖR TANIMLARI ══════════════ */
+const SENSORS = [
+  { g: "Ortam", items: [
+    { id:"derinlik", l:"Derinlik",       u:"m",   v:18.4, min:0,  max:40,  d:1 },
+    { id:"suSic",    l:"Su sıcaklığı",   u:"°C",  v:11.2, min:0,  max:30,  d:1 },
+    { id:"basinc",   l:"Basınç",         u:"bar", v:2.84, min:0,  max:5,   d:2 },
+    { id:"bulanik",  l:"Bulanıklık",     u:"NTU", v:1.2,  min:0,  max:10,  d:1, warn:4 },
+  ]},
+  { g: "Gövde", items: [
+    { id:"icSic",    l:"İç sıcaklık",    u:"°C",  v:42.6, min:0,  max:80,  d:1, warn:55, crit:68 },
+    { id:"nem",      l:"Nem",            u:"%",   v:38,   min:0,  max:100, d:0, warn:65 },
+    { id:"sizinti",  l:"Sızıntı",        flag:"YOK" },
+    { id:"batarya",  l:"Batarya",        u:"%",   v:78,   min:0,  max:100, d:0, low:25, lowCrit:12 },
+    { id:"hatVolt",  l:"Hat voltajı",    u:"V",   v:48.2, min:0,  max:60,  d:1 },
+    { id:"cekilen",  l:"Çekilen akım",   u:"A",   v:6.4,  min:0,  max:20,  d:1 },
+  ]},
+  { g: "Duruş", compact: true, items: [
+    { id:"yatis",    l:"Yatış",          u:"°",   v:-2.1, min:-30, max:30, d:1 },
+    { id:"yunus",    l:"Yunuslama",      u:"°",   v:4.8,  min:-30, max:30, d:1 },
+    { id:"yon",      l:"Yön",            u:"°",   v:137,  min:0,   max:360,d:0 },
+  ]},
+  { g: "Kaynak hattı", items: [
+    { id:"kayAkim",  l:"Kaynak akımı",   u:"A",   v:178,  min:0, max:300, d:0, arc:true },
+    { id:"arkVolt",  l:"Ark voltajı",    u:"V",   v:26.4, min:0, max:40,  d:1, arc:true },
+    { id:"telHiz",   l:"Tel besleme",    u:"m/dk",v:4.2,  min:0, max:10,  d:1, arc:true },
+    { id:"torcSic",  l:"Torç sıcaklığı", u:"°C",  v:68,   min:0, max:150, d:0, warn:110, crit:135 },
+  ]},
+];
+
+/* eksenler: operatör komutunun kolda karşılığı */
+const AXES = [
+  { id:"omuz",  l:"Omuz",        min:-90,  max:90,  t:24,  a:24  },
+  { id:"dirsek",l:"Dirsek",      min:-120, max:120, t:-46, a:-46 },
+  { id:"bilekD",l:"Bilek dönüş", min:-180, max:180, t:12,  a:12  },
+  { id:"bilekE",l:"Bilek eğim",  min:-90,  max:90,  t:-8,  a:-8  },
+  { id:"torc",  l:"Torç açısı",  min:0,    max:90,  t:63,  a:63  },
+  { id:"kiskac",l:"Kıskaç",      min:0,    max:100, t:38,  a:38  },
+];
+
+/* ══════════════ 2. DURUM ══════════════ */
+const state = {
+  mod: "op",                 // "op" | "oto"
+  arkAktif: true,
+  acilDurdu: false,
+  kamera: "torc",
+  isik: 70,
+  zoom: 1.0,
+  torc: { toplam: 148, dalis: 12, sure: 277, elektrot: 7, elektrotTop: 24 },
+  gecikme: 34,
+  kuvvet: 14.2,
+  temas: false,
+  kiskac: 38,
+  komut: { lx: 0, ly: 0, rx: 0, ry: 0 },   // operatörün istediği (-1..1)
+  gercek:{ lx: 0, ly: 0, rx: 0, ry: 0 },   // kolun ulaştığı
+  akimGecmisi: Array.from({ length: 60 }, () => 170 + Math.random() * 18),
+  sayac: { kayit: 724, calisma: 6442 },
+};
+
+/* ══════════════ 3. İSKELET ══════════════ */
+const sensorsEl = $("#sensors");
+sensorsEl.innerHTML = SENSORS.map(grp => `
+  <div class="sgrp">${grp.g}</div>
+  ${grp.compact
+    ? `<div class="srow">${grp.items.map(s => `
+        <div class="sc sr" data-id="${s.id}">
+          <span class="k">${s.l}</span><span class="sr-v">—</span>
+        </div>`).join("")}</div>`
+    : grp.items.map(s => s.flag
+    ? `<div class="sr" data-id="${s.id}"><span class="sr-l">${s.l}</span><span class="sr-flag">${s.flag}</span></div>`
+    : `<div class="sr" data-id="${s.id}">
+         <span class="sr-l">${s.l}</span>
+         <span class="sr-v">—<span class="u">${s.u}</span></span>
+         <span class="sr-bar"><i style="width:0%"></i></span>
+       </div>`
+  ).join("")}
+`).join("");
+
+const axesEl = $("#axes");
+axesEl.innerHTML = AXES.map(a => `
+  <div class="ax" data-id="${a.id}">
+    <span class="ax-n">${a.l}</span>
+    <span class="ax-t"><i class="fill"></i><i class="tgt"></i></span>
+    <span class="ax-v num">0.0°</span>
+    <span class="ax-d num">Δ 0.0</span>
+  </div>`).join("");
+
+$("#elec-bar").innerHTML = Array.from({ length: state.torc.elektrotTop }, () => "<i></i>").join("");
+$("#force-bar").innerHTML = Array.from({ length: 18 }, () => "<i></i>").join("");
+
+const SEN = new Map();
+$$(".sr", sensorsEl).forEach(el => SEN.set(el.dataset.id, {
+  el, v: $(".sr-v", el), bar: $(".sr-bar i", el),
+}));
+const AX = new Map();
+$$(".ax", axesEl).forEach(el => AX.set(el.dataset.id, {
+  el, fill: $(".fill", el), tgt: $(".tgt", el), v: $(".ax-v", el), d: $(".ax-d", el),
+}));
+
+/* ══════════════ 4. ÇİZİM ══════════════ */
+function sensorDurum(s) {
+  if (s.crit != null && s.v >= s.crit) return "crit";
+  if (s.warn != null && s.v >= s.warn) return "warn";
+  if (s.lowCrit != null && s.v <= s.lowCrit) return "crit";
+  if (s.low != null && s.v <= s.low) return "warn";
+  if (s.arc) return "arc";
+  return "ok";
+}
+
+function renderSensors() {
+  for (const grp of SENSORS) for (const s of grp.items) {
+    const n = SEN.get(s.id); if (!n || s.flag) continue;
+    n.v.innerHTML = `${s.v.toFixed(s.d)}<span class="u">${s.u}</span>`;
+    if (n.bar) n.bar.style.width = `${clamp((s.v - s.min) / (s.max - s.min) * 100, 0, 100)}%`;
+    n.el.dataset.s = sensorDurum(s);
+  }
+}
+
+function renderAxes() {
+  for (const a of AXES) {
+    const n = AX.get(a.id);
+    const p = v => clamp((v - a.min) / (a.max - a.min) * 100, 0, 100);
+    const origin = p(clamp(0, a.min, a.max));
+    const cur = p(a.a);
+    n.fill.style.left  = `${Math.min(origin, cur)}%`;
+    n.fill.style.width = `${Math.abs(cur - origin)}%`;
+    n.tgt.style.left   = `${p(a.t)}%`;
+    n.v.textContent    = `${a.a.toFixed(1)}°`;
+    const d = a.t - a.a;
+    n.d.textContent    = `Δ ${d >= 0 ? "" : "−"}${Math.abs(d).toFixed(1)}`;
+    n.d.dataset.hot    = Math.abs(d) > 6;
+  }
+}
+
+function renderTorch() {
+  const t = state.torc;
+  $("#arc-total").textContent = String(t.toplam).padStart(4, "0");
+  $("#arc-dive").textContent  = t.dalis;
+  $("#arc-time").textContent  =
+    `${String(Math.floor(t.sure / 60)).padStart(2,"0")}:${String(t.sure % 60).padStart(2,"0")}`;
+  $("#elec-used").textContent = t.elektrot;
+  $$("#elec-bar i").forEach((el, i) => {
+    el.className = i < t.elektrot - 1 ? "used" : (i === t.elektrot - 1 && state.arkAktif ? "now" : "");
+  });
+  const amp = SENSORS[3].items[0].v, volt = SENSORS[3].items[1].v, tsic = SENSORS[3].items[3].v;
+  $("#arc-amp").innerHTML  = `${amp.toFixed(0)}<span class="u">A</span>`;
+  $("#arc-volt").innerHTML = `${volt.toFixed(1)}<span class="u">V</span>`;
+  $("#arc-temp").innerHTML = `${tsic.toFixed(0)}<span class="u">°C</span>`;
+}
+
+/* akım kıvılcım grafiği — tek seri, başlık zaten adını veriyor */
+function renderSpark() {
+  const h = state.akimGecmisi, W = 240, H = 32, pad = 3;
+  const lo = 140, hi = 230;
+  const x = i => i / (h.length - 1) * W;
+  const y = v => H - pad - clamp((v - lo) / (hi - lo), 0, 1) * (H - pad * 2);
+  const pts = h.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+  $("#spark-line").setAttribute("d", "M" + pts.join("L"));
+  $("#spark-area").setAttribute("d", `M0,${H}L` + pts.join("L") + `L${W},${H}Z`);
+  const e = $("#spark-end");
+  e.setAttribute("cx", W); e.setAttribute("cy", y(h[h.length - 1]));
+}
+
+function renderForce() {
+  const cells = $$("#force-bar i"), n = cells.length;
+  const lvl = Math.round(clamp(state.kuvvet / 40, 0, 1) * n);
+  cells.forEach((c, i) => {
+    c.className = i >= lvl ? "" : i > n * 0.82 ? "max" : i > n * 0.62 ? "hi" : "on";
+  });
+  $("#force-val").innerHTML = `${state.kuvvet.toFixed(1)}<span class="u">N</span>`;
+  $("#contact").textContent = state.temas ? "VAR" : "YOK";
+  $("#contact").style.color = state.temas ? "var(--arc)" : "var(--ok)";
+  $("#grip").innerHTML = `${state.kiskac.toFixed(0)}<span class="u">%</span>`;
+}
+
+/* ══════════════ 5. TELEMETRİ GİRİŞİ ══════════════ */
+function applyTelemetry(patch = {}) {
+  if (patch.sensor) for (const grp of SENSORS) for (const s of grp.items)
+    if (patch.sensor[s.id] != null) s.v = patch.sensor[s.id];
+  if (patch.eksen) for (const a of AXES) {
+    const p = patch.eksen[a.id];
+    if (p) { if (p.t != null) a.t = p.t; if (p.a != null) a.a = p.a; }
+  }
+  Object.assign(state, patch.durum || {});
+  renderSensors(); renderAxes(); renderTorch(); renderSpark(); renderForce(); renderHud();
+}
+
+/* ══════════════ 6. HUD METİNLERİ ══════════════ */
+function renderHud() {
+  const s = id => SENSORS.flatMap(g => g.items).find(x => x.id === id).v;
+  $("#hud-depth").textContent = `${s("derinlik").toFixed(1)} m`;
+  $("#hud-hdg").textContent   = `${s("yon").toFixed(0)}°`;
+  $("#hud-vis").textContent   = `${s("bulanik").toFixed(1)} NTU`;
+  $("#hud-light").textContent = `${state.isik}%`;
+  $("#hud-dist").textContent  = `${(0.42 - state.gercek.ry * 0.12).toFixed(2)} m`;
+  $("#fb-lat").textContent    = `gecikme ${state.gecikme} ms`;
+  $("#lat").textContent       = `${state.gecikme} ms`;
+}
+
+/* ══════════════ 7. KAMERA SAHNESİ ══════════════ */
+const cv = $("#feed"), ctx = cv.getContext("2d");
+let W = 0, H = 0, dpr = 1;
+const snow = Array.from({ length: 130 }, () => ({
+  x: Math.random(), y: Math.random(), z: Math.random(), vy: Math.random() * 0.5 + 0.15,
+}));
+
+function resizeCanvas() {
+  const r = cv.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = r.width; H = r.height;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+new ResizeObserver(resizeCanvas).observe(cv);
+
+function seamY(x, t) {          // dikişin dalgalı ekseni
+  return Math.sin(x * 0.011 + 0.6) * 6 + Math.sin(x * 0.031 + t * 0.0004) * 2.5;
+}
+
+function drawScene(t) {
+  if (!W) return;
+  const isik = state.isik / 100;
+  const bulanik = SENSORS[0].items[3].v / 10;
+  const cam = state.kamera;
+
+  /* su */
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#08202A"); g.addColorStop(.55, "#051219"); g.addColorStop(1, "#020608");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  /* dalış lambası havuzu */
+  const lg = ctx.createRadialGradient(W * .5, H * .55, 0, W * .5, H * .55, Math.max(W, H) * (.3 + isik * .4));
+  lg.addColorStop(0, `rgba(124,196,214,${.13 * isik})`);
+  lg.addColorStop(1, "rgba(124,196,214,0)");
+  ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.translate(W / 2, H / 2); ctx.scale(state.zoom, state.zoom); ctx.translate(-W / 2, -H / 2);
+
+  if (cam === "alt") {
+    /* deniz tabanı */
+    const sg = ctx.createLinearGradient(0, H * .42, 0, H);
+    sg.addColorStop(0, "#0A1418"); sg.addColorStop(1, "#151A14");
+    ctx.fillStyle = sg; ctx.fillRect(0, H * .42, W, H * .58);
+    for (let i = 0; i < 14; i++) {
+      const rx = ((i * 97) % 100) / 100 * W, ry = H * (.5 + ((i * 37) % 45) / 100);
+      ctx.fillStyle = `rgba(30,40,42,${.5 + (i % 3) * .12})`;
+      ctx.beginPath(); ctx.ellipse(rx, ry, 14 + (i % 5) * 9, 6 + (i % 4) * 4, 0, 0, 7); ctx.fill();
+    }
+  } else {
+    /* boru gövdesi */
+    const sc  = cam === "torc" ? .30 : .18;
+    const cy  = H * (cam === "torc" ? .52 : .48);
+    const ph  = H * sc;
+    const pg = ctx.createLinearGradient(0, cy - ph, 0, cy + ph);
+    pg.addColorStop(0,   "#060B0E");
+    pg.addColorStop(.06, `rgba(52,74,84,${.5 + isik * .4})`);
+    pg.addColorStop(.30, `rgba(74,102,112,${.78 + isik * .22})`);
+    pg.addColorStop(.47, `rgba(104,138,150,${.82 + isik * .18})`);
+    pg.addColorStop(.66, `rgba(52,74,84,${.85 + isik * .15})`);
+    pg.addColorStop(.94, "rgba(16,26,31,.96)");
+    pg.addColorStop(1,   "#04080A");
+    ctx.fillStyle = pg; ctx.fillRect(0, cy - ph, W, ph * 2);
+    ctx.strokeStyle = `rgba(150,186,200,${.18 + isik * .22})`; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, cy - ph); ctx.lineTo(W, cy - ph); ctx.stroke();
+    ctx.strokeStyle = "rgba(2,5,7,.9)";
+    ctx.beginPath(); ctx.moveTo(0, cy + ph); ctx.lineTo(W, cy + ph); ctx.stroke();
+
+    /* korozyon dokusu */
+    ctx.globalAlpha = .18;
+    for (let i = 0; i < 60; i++) {
+      const px = ((i * 73) % 100) / 100 * W, py = cy + (((i * 51) % 100) / 100 - .5) * ph * 1.7;
+      ctx.fillStyle = i % 3 ? "#2C3B40" : "#4A3B2A";
+      ctx.fillRect(px, py, 6 + (i % 7) * 4, 1.5 + (i % 3));
+    }
+    ctx.globalAlpha = 1;
+
+    /* dikiş */
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 6) { const y = cy + seamY(x, t); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = `rgba(150,178,188,${.32 + isik * .28})`; ctx.lineWidth = 3; ctx.stroke();
+    ctx.strokeStyle = "rgba(8,14,17,.85)"; ctx.lineWidth = 1; ctx.stroke();
+
+    /* tamamlanmış kaynak paçavrası (soldan itibaren) */
+    const done = W * .12 + (state.arkAktif ? (t * .008) % (W * .5) : W * .3);
+    ctx.beginPath();
+    for (let x = 0; x <= done; x += 5) { const y = cy + seamY(x, t); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = `rgba(190,175,150,${.4 + isik * .3})`; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.stroke();
+    for (let x = W * .12; x <= done; x += 9) {
+      ctx.beginPath(); ctx.arc(x, cy + seamY(x, t), 2.6, 0, 7);
+      ctx.fillStyle = `rgba(210,198,176,${.22 + isik * .2})`; ctx.fill();
+    }
+
+    /* torç ucu + ark */
+    if (cam === "torc") {
+      const tx = done, ty = cy + seamY(done, t);
+      ctx.save();
+      ctx.translate(tx, ty);
+      ctx.rotate(-0.42);
+      ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(9, 0); ctx.lineTo(20, -74); ctx.lineTo(-20, -74); ctx.closePath();
+      const tg = ctx.createLinearGradient(0, -74, 0, 0);
+      tg.addColorStop(0, "#2A343A"); tg.addColorStop(1, "#4C5A61");
+      ctx.fillStyle = tg; ctx.fill();
+      ctx.strokeStyle = "#0A1014"; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.restore();
+
+      if (state.arkAktif && !state.acilDurdu) {
+        const fl = REDUCED ? .86 : .72 + Math.sin(t * .05) * .14 + Math.random() * .18;
+        const ag = ctx.createRadialGradient(tx, ty, 0, tx, ty, 86 * fl);
+        ag.addColorStop(0,   `rgba(255,246,224,${.95 * fl})`);
+        ag.addColorStop(.14, `rgba(255,196,96,${.72 * fl})`);
+        ag.addColorStop(.42, `rgba(255,138,31,${.26 * fl})`);
+        ag.addColorStop(1,   "rgba(255,138,31,0)");
+        ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(tx, ty, 86 * fl, 0, 7); ctx.fill();
+        for (let i = 0; i < (REDUCED ? 0 : 7); i++) {       /* kıvılcım */
+          const a = Math.random() * Math.PI, d = Math.random() * 46;
+          ctx.fillStyle = `rgba(255,${180 + Math.random() * 60 | 0},90,${.8 - d / 60})`;
+          ctx.fillRect(tx + Math.cos(a) * d, ty + Math.sin(a) * d * .5, 1.6, 1.6);
+        }
+      }
+    }
+  }
+  ctx.restore();
+
+  /* askıda katı madde (deniz karı) */
+  for (const p of snow) {
+    if (!REDUCED) { p.y -= p.vy * 0.0016; if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); } }
+    const r = .5 + p.z * 1.9;
+    ctx.fillStyle = `rgba(198,224,232,${(.06 + p.z * .3) * (.4 + isik * .6)})`;
+    ctx.beginPath(); ctx.arc(p.x * W, p.y * H, r, 0, 7); ctx.fill();
+  }
+
+  /* bulanıklık + vinyet */
+  ctx.fillStyle = `rgba(24,58,66,${.04 + bulanik * .17})`; ctx.fillRect(0, 0, W, H);
+  const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .34, W / 2, H / 2, Math.max(W, H) * .8);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+
+  if (state.acilDurdu) { ctx.fillStyle = "rgba(120,10,6,.18)"; ctx.fillRect(0, 0, W, H); }
+}
+
+/* ══════════════ 8. JOYSTICK PEDLERİ ══════════════ */
+/* Operatörün komutu (turuncu halka) ile kolun gerçekte ulaştığı nokta
+   (mavi nokta) arasındaki fark, geri bildirim mekanizmasının kendisidir. */
+function bindPad(el, kx, ky, out) {
+  const cmd = $(".cmd", el), act = $(".act", el);
+  let dragging = false;
+
+  const set = e => {
+    const r = el.getBoundingClientRect();
+    state.komut[kx] = clamp((e.clientX - r.left) / r.width  * 2 - 1, -1, 1);
+    state.komut[ky] = clamp((e.clientY - r.top)  / r.height * 2 - 1, -1, 1);
+  };
+  el.addEventListener("pointerdown", e => {
+    if (state.mod !== "op" || state.acilDurdu) return;
+    dragging = true; el.classList.add("touched");
+    el.setPointerCapture(e.pointerId); set(e);
+  });
+  el.addEventListener("pointermove", e => { if (dragging) set(e); });
+  const release = () => { dragging = false; };
+  el.addEventListener("pointerup", release);
+  el.addEventListener("pointercancel", release);
+
+  return () => {                                   // her karede çağrılır
+    if (!dragging) {                               // yay merkezleme
+      state.komut[kx] = lerp(state.komut[kx], 0, .12);
+      state.komut[ky] = lerp(state.komut[ky], 0, .12);
+    }
+    const gain = state.acilDurdu ? 0 : 1;
+    state.gercek[kx] = lerp(state.gercek[kx], state.komut[kx] * gain, .085);
+    state.gercek[ky] = lerp(state.gercek[ky], state.komut[ky] * gain, .085);
+
+    cmd.style.left = `${(state.komut[kx] + 1) / 2 * 100}%`;
+    cmd.style.top  = `${(state.komut[ky] + 1) / 2 * 100}%`;
+    act.style.left = `${(state.gercek[kx] + 1) / 2 * 100}%`;
+    act.style.top  = `${(state.gercek[ky] + 1) / 2 * 100}%`;
+    out.textContent = `${state.gercek[kx] >= 0 ? " " : "−"}${Math.abs(state.gercek[kx]).toFixed(2)} ` +
+                      `${state.gercek[ky] >= 0 ? " " : "−"}${Math.abs(state.gercek[ky]).toFixed(2)}`;
+  };
+}
+const tickPadL = bindPad($("#pad-l"), "lx", "ly", $("#pad-l-val"));
+const tickPadR = bindPad($("#pad-r"), "rx", "ry", $("#pad-r-val"));
+
+/* komut → eklem hedefi eşlemesi */
+function komutuEksenlereYaz() {
+  const k = state.komut, ax = id => AXES.find(a => a.id === id);
+  ax("omuz").t   = clamp(k.lx * 62, -90, 90);
+  ax("dirsek").t = clamp(-46 + k.ly * 52, -120, 120);
+  ax("bilekD").t = clamp(k.rx * 96, -180, 180);
+  ax("bilekE").t = clamp(k.ry * 58, -90, 90);
+  for (const a of AXES) {
+    a.a = lerp(a.a, a.t, state.acilDurdu ? .02 : .062) + (REDUCED ? 0 : (Math.random() - .5) * .1);
+  }
+}
+
+/* ══════════════ 9. MOD GEÇİŞİ ══════════════ */
+function moduAyarla(m) {
+  if (state.mod === m) return;
+  state.mod = m;
+  $$(".mode").forEach(b => b.setAttribute("aria-selected", String(b.dataset.mode === m)));
+  $("#panel-op").hidden  = m !== "op";
+  $("#panel-oto").hidden = m !== "oto";
+  $("#det").hidden       = m !== "oto";
+  $("#ai-badge").hidden  = m !== "oto";
+  $("#retic").style.display = m === "oto" ? "none" : "";
+  gunlukEkle(m === "oto" ? "oto" : "ark",
+    m === "oto" ? "Otonom moda geçildi — dikiş takip düğümü devrede"
+                : "Kontrol operatöre devredildi — otonom düğüm beklemede");
+}
+$$(".mode").forEach(b => b.addEventListener("click", () => moduAyarla(b.dataset.mode)));
+$("#takeover").addEventListener("click", () => moduAyarla("op"));
+
+/* otonom katmandaki dikiş izi */
+function seamIziCiz() {
+  if ($("#det").hidden || !W) return;
+  const z = state.zoom, t = performance.now(), pts = [];
+  for (let i = 0; i <= 20; i++) {
+    const x = W * (.31 + .38 * i / 20);
+    const y = H * .52 + seamY(x, t);
+    pts.push(`${W / 2 + (x - W / 2) * z},${H / 2 + (y - H / 2) * z}`);
+  }
+  $("#seam-path").setAttribute("points", pts.join(" "));
+}
+
+/* ══════════════ 10. ACİL DURDURMA ══════════════ */
+$("#estop").addEventListener("click", () => {
+  state.acilDurdu = !state.acilDurdu;
+  const b = $("#estop");
+  b.dataset.fired = String(state.acilDurdu);
+  b.textContent = state.acilDurdu ? "Kilidi aç" : "Acil durdur";
+  if (state.acilDurdu) {
+    state.arkAktif = false;
+    $("#chip-arc").dataset.s = "crit";
+    $("#chip-arc").classList.remove("live");
+    $("#chip-arc").lastChild.textContent = "Ark kapalı";
+    gunlukEkle("uyari", "ACİL DURDURMA — ark söndürüldü, eklemler frenlendi");
+  } else {
+    state.arkAktif = true;
+    $("#chip-arc").dataset.s = "arc";
+    $("#chip-arc").classList.add("live");
+    $("#chip-arc").lastChild.textContent = "Ark aktif";
+    gunlukEkle("ark", "Kilit açıldı — sistem hazır, ark yeniden tutuşturuldu");
+  }
+});
+
+/* ══════════════ 11. KAMERA KONTROLLERİ ══════════════ */
+const CAM_AD = { torc: "TORÇ KAMERASI", on: "ÖN KAMERA", alt: "ALT KAMERA" };
+$$(".camtab").forEach(b => b.addEventListener("click", () => {
+  $$(".camtab").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  state.kamera = b.dataset.cam;
+  $("#cam-name").textContent = CAM_AD[state.kamera];
+}));
+$("#light").addEventListener("input", e => {
+  state.isik = +e.target.value; $("#light-out").textContent = `${state.isik}%`; renderHud();
+});
+$("#zoom").addEventListener("input", e => {
+  state.zoom = +e.target.value / 10; $("#zoom-out").textContent = `${state.zoom.toFixed(1)}×`;
+});
+$("#snap").addEventListener("click", () => gunlukEkle("oto", `Kare yakalandı — ${CAM_AD[state.kamera].toLowerCase()}, 18.4 m`));
+$("#markbtn").addEventListener("click", () => gunlukEkle("oto", "İşaret bırakıldı — dikiş 3, konum 124 mm"));
+
+/* ══════════════ 12. OLAY GÜNLÜĞÜ ══════════════ */
+function saat(d = new Date()) {
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, "0")).join(":");
+}
+function gunlukEkle(tag, msg) {
+  $("#log-ts").textContent = saat();
+  $("#log-tag").dataset.t = tag;
+  $("#log-tag").textContent = tag;
+  $("#log-msg").textContent = msg;
+}
+const OLAYLAR = [
+  ["ark",   () => `Ark kararlı — ${SENSORS[3].items[0].v.toFixed(0)} A / ${SENSORS[3].items[1].v.toFixed(1)} V`],
+  ["oto",   () => "Dikiş takibi: yanal sapma 0.8 mm, düzeltme uygulandı"],
+  ["ark",   () => `Elektrot ${state.torc.elektrot} — kalan ömür %${(100 - state.torc.sure % 90).toFixed(0)}`],
+  ["uyari", () => `İç sıcaklık ${SENSORS[1].items[0].v.toFixed(1)} °C — soğutma döngüsü hızlandırıldı`],
+  ["oto",   () => "Umbilikal gerginliği normal — sarım motoru beklemede"],
+];
+let olayIdx = 0;
+setInterval(() => {
+  if (state.acilDurdu) return;
+  const [t, f] = OLAYLAR[olayIdx++ % OLAYLAR.length];
+  gunlukEkle(t, f());
+}, 6500);
+
+/* ══════════════ 13. SİMÜLASYON KAYNAĞI ══════════════ */
+/* ROS 2'ye geçişte bu blok tamamen silinir; yerine RosSource gelir. */
+const sen = id => SENSORS.flatMap(g => g.items).find(x => x.id === id);
+function SimSource() {
+  const gurultu = (s, amp) => { s.v = clamp(s.v + (Math.random() - .5) * amp, s.min, s.max); };
+
+  setInterval(() => {
+    gurultu(sen("derinlik"), .06); gurultu(sen("suSic"), .04);
+    sen("basinc").v = 1 + sen("derinlik").v / 10.2;
+    gurultu(sen("bulanik"), .05);
+    sen("icSic").v = clamp(sen("icSic").v + (state.arkAktif ? .035 : -.05)
+                            + (Math.random() - .5) * .18, 0, 80);
+    gurultu(sen("nem"), .2);
+    sen("batarya").v = clamp(sen("batarya").v - .0016, 0, 100);
+    gurultu(sen("hatVolt"), .06); gurultu(sen("cekilen"), .12);
+    sen("yatis").v  = -2.1 + state.gercek.lx * 5 + (Math.random() - .5) * .3;
+    sen("yunus").v  =  4.8 + state.gercek.ly * 4 + (Math.random() - .5) * .3;
+    sen("yon").v    = (sen("yon").v + state.gercek.rx * .8 + 360) % 360;
+
+    if (state.arkAktif) {
+      gurultu(sen("kayAkim"), 7); gurultu(sen("arkVolt"), .35);
+      gurultu(sen("telHiz"), .12); gurultu(sen("torcSic"), .5);
+    } else {
+      sen("kayAkim").v = lerp(sen("kayAkim").v, 0, .25);
+      sen("arkVolt").v = lerp(sen("arkVolt").v, 0, .25);
+      sen("telHiz").v  = lerp(sen("telHiz").v, 0, .25);
+      sen("torcSic").v = lerp(sen("torcSic").v, 22, .01);
+    }
+
+    state.akimGecmisi.push(sen("kayAkim").v); state.akimGecmisi.shift();
+    state.gecikme = Math.round(clamp(state.gecikme + (Math.random() - .5) * 4, 18, 62));
+
+    const hata = AXES.reduce((s, a) => s + Math.abs(a.t - a.a), 0);
+    state.kuvvet = clamp(lerp(state.kuvvet, 6 + hata * .35 + Math.abs(state.gercek.ly) * 16, .2), 0, 40);
+    state.temas  = state.kuvvet > 21;
+    state.kiskac = clamp(lerp(state.kiskac, 38 + state.gercek.ry * 34, .1), 0, 100);
+
+    applyTelemetry();
+  }, 100);
+
+  setInterval(() => {                                   /* saniyelik sayaçlar */
+    if (state.arkAktif) state.torc.sure++;
+    state.sayac.kayit++; state.sayac.calisma++;
+    const hms = s => [s / 3600 | 0, s / 60 % 60 | 0, s % 60].map(n => String(n | 0).padStart(2, "0")).join(":");
+    $("#rec-time").textContent = hms(state.sayac.kayit);
+    $("#uptime").textContent   = hms(state.sayac.calisma);
+    $("#net-rate").textContent = `${(18.4 + (Math.random() - .5) * 1.2).toFixed(1)} Mb/s`;
+    $("#net-loss").textContent = `${(Math.random() * .06).toFixed(2)}%`;
+    if ($("#panel-oto").hidden === false) {
+      $("#ai-fps").innerHTML = `${(27 + Math.random() * 3).toFixed(0)}<span class="u">fps</span>`;
+      $("#ai-ms").innerHTML  = `${(30 + Math.random() * 9).toFixed(0)}<span class="u">ms</span>`;
+      const dev = Math.abs(0.8 + (Math.random() - .5) * .6);
+      $("#ai-dev").innerHTML = `${dev.toFixed(1)}<span class="u">mm</span>`;
+      const c = 93 + Math.random() * 6;
+      $("#ai-conf").textContent = `%${c.toFixed(0)}`;
+      $("#conf-bar").style.width = `${c}%`;
+    }
+  }, 1000);
+
+  setInterval(() => {                                   /* yeni ark / elektrot */
+    if (!state.arkAktif) return;
+    state.torc.toplam++; state.torc.dalis++;
+    if (state.torc.toplam % 4 === 0) state.torc.elektrot = Math.min(state.torc.elektrot + 1, state.torc.elektrotTop);
+    gunlukEkle("ark", `Ark başlatıldı — elektrot ${state.torc.elektrot}, ${sen("kayAkim").v.toFixed(0)} A`);
+  }, 21000);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ROS 2 KAYNAĞI — rosbridge_suite + roslibjs ile. SimSource'un yerine geçer.
+
+   function RosSource() {
+     const ros = new ROSLIB.Ros({ url: "ws://robokol.local:9090" });
+     ros.on("connection", () => gunlukEkle("oto", "rosbridge bağlantısı kuruldu"));
+     ros.on("error",      () => gunlukEkle("uyari", "rosbridge bağlantı hatası"));
+
+     new ROSLIB.Topic({ ros, name: "/robokol/telemetri",
+                        messageType: "robokol_msgs/msg/Telemetri" })
+       .subscribe(m => applyTelemetry({ sensor: {
+         derinlik: m.derinlik, suSic: m.su_sicaklik, basinc: m.basinc,
+         icSic: m.ic_sicaklik, batarya: m.batarya_yuzde, sizinti: m.sizinti }}));
+
+     new ROSLIB.Topic({ ros, name: "/robokol/kol/durum",
+                        messageType: "sensor_msgs/msg/JointState" })
+       .subscribe(m => applyTelemetry({ eksen: Object.fromEntries(
+         m.name.map((n, i) => [n, { a: m.position[i] * 180 / Math.PI }])) }));
+
+     // komut yayını — pedlerden gelen değerler 20 Hz'de gider
+     const komut = new ROSLIB.Topic({ ros, name: "/robokol/kol/komut",
+                                      messageType: "geometry_msgs/msg/Twist" });
+     setInterval(() => komut.publish(new ROSLIB.Message({
+       linear:  { x: state.komut.ly, y: state.komut.lx, z: state.komut.ry },
+       angular: { x: 0, y: 0, z: state.komut.rx } })), 50);
+
+     // kamera: canvas yerine web_video_server akışı
+     // $("#feed").replaceWith(Object.assign(new Image(), {
+     //   src: "http://robokol.local:8080/stream?topic=/robokol/kamera/torc/image_raw" }));
+   }
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ══════════════ 14. ANA DÖNGÜ ══════════════ */
+function loop(t) {
+  tickPadL(); tickPadR();
+  komutuEksenlereYaz();
+  renderAxes(); renderForce();
+  drawScene(t);
+  seamIziCiz();
+  requestAnimationFrame(loop);
+}
+
+resizeCanvas();
+renderSensors(); renderAxes(); renderTorch(); renderSpark(); renderForce(); renderHud();
+SimSource();
+requestAnimationFrame(loop);
+</script>
