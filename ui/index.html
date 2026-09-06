@@ -239,6 +239,37 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .tg .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .tg .v{font-family:var(--mono);font-size:15px;font-weight:500;margin-top:2px}
 
+/* torç ömrü */
+.omur{margin-top:10px}
+.omur-hd{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.omur-hd b{font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0;font-weight:500}
+.omur-bar{
+  height:9px;margin-top:5px;
+  background:var(--abyss);border:1px solid var(--rule);border-radius:2px;
+  overflow:hidden;position:relative;
+}
+.omur-bar i{
+  display:block;height:100%;
+  background:linear-gradient(90deg,var(--arc-dim),var(--arc));
+  transition:width .4s linear,background .3s;
+}
+/* %30 ve %12 uyarı eşikleri — çubuk üstünde ince çentikler */
+.omur-bar::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(var(--rule-2),var(--rule-2)) 12% 0/1px 100% no-repeat,
+    linear-gradient(var(--rule-2),var(--rule-2)) 30% 0/1px 100% no-repeat;
+}
+.omur[data-s="warn"] .omur-bar i{background:linear-gradient(90deg,#6B5410,var(--warn))}
+.omur[data-s="warn"] .omur-hd b{color:var(--warn)}
+.omur[data-s="crit"] .omur-bar i{background:linear-gradient(90deg,#5E211D,var(--crit))}
+.omur[data-s="crit"] .omur-hd b{color:var(--crit)}
+.omur-meta{
+  font-family:var(--mono);font-size:10px;color:var(--ink-3);
+  margin-top:5px;display:flex;justify-content:space-between;gap:8px;
+}
+
 /* elektrot barı */
 .elec{margin-top:10px}
 .elec-hd{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
@@ -332,6 +363,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .hud-top .cam-id{display:flex;align-items:center;gap:7px;font-weight:500}
 .rec{display:flex;align-items:center;gap:5px;color:#FF7A70}
 .rec::before{content:"";width:7px;height:7px;border-radius:50%;background:#FF5F52;animation:pulse 1.6s ease-in-out infinite}
+.rec[data-on="false"]{color:rgba(150,180,195,.8)}
+.rec[data-on="false"]::before{background:rgba(150,180,195,.6);animation:none}
 
 .hud-bottom{
   position:absolute;bottom:10px;left:42px;right:42px;
@@ -398,14 +431,6 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   border-radius:var(--r);
   overflow-x:auto;
 }
-.camtabs{display:flex;gap:2px;background:var(--abyss);border:1px solid var(--rule);border-radius:2px;padding:2px;flex:none}
-.camtab{
-  padding:5px 11px;border-radius:2px;
-  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--ink-3);white-space:nowrap;
-}
-.camtab:hover{color:var(--ink-2);background:var(--hull-2)}
-.camtab[aria-pressed="true"]{background:var(--hull-3);color:var(--deep)}
 
 .slider{display:flex;align-items:center;gap:8px;flex:none}
 .slider label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
@@ -426,12 +451,18 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .camctl .sep{width:1px;height:22px;background:var(--rule);flex:none}
 .iconbtn{
   display:flex;align-items:center;gap:6px;
-  padding:5px 10px;
+  padding:5px 9px;
   border:1px solid var(--rule-2);border-radius:2px;
-  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
   color:var(--ink-2);white-space:nowrap;
 }
 .iconbtn:hover{background:var(--hull-2);color:var(--ink)}
+.iconbtn[data-on="true"]{border-color:#7A2A24;color:#FF8078}
+.iconbtn[data-on="true"]::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--crit)}
+.iconbtn b{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  padding:0 4px;border-radius:2px;background:var(--hull-3);color:var(--ink-2);
+}
 
 /* ============================================================
    SAĞ PANEL — OPERATÖR GERİ BİLDİRİMİ
@@ -442,10 +473,13 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .pads{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pad-wrap{display:flex;flex-direction:column;gap:5px}
 .pad-cap{
-  display:flex;justify-content:space-between;align-items:baseline;
-  font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  display:flex;justify-content:space-between;align-items:baseline;gap:6px;
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+  white-space:nowrap;
 }
+.pad-cap span{overflow:hidden;text-overflow:ellipsis}
 .pad-cap b{font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:0;font-weight:500}
+.pad-cap b.uyari{color:var(--warn)}
 .pad{
   position:relative;
   aspect-ratio:1;
@@ -480,7 +514,25 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   box-shadow:0 0 10px rgba(92,184,232,.7), 0 0 0 2px var(--abyss);
   pointer-events:none;
 }
-.pad .link{position:absolute;inset:0;pointer-events:none}
+.pad .link{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.pad:focus-visible{outline:2px solid var(--arc);outline-offset:2px}
+.pad-tools{display:flex;justify-content:flex-end;margin-top:7px}
+.minibtn{
+  padding:3px 9px;border:1px solid var(--rule-2);border-radius:2px;
+  font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+}
+.minibtn:hover{background:var(--hull-2);color:var(--ink-2)}
+.camtabs{display:flex;gap:2px;background:var(--abyss);border:1px solid var(--rule);border-radius:2px;padding:2px;flex:none}
+.camtab{
+  padding:5px 11px;border-radius:2px;
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);white-space:nowrap;
+}
+.camtab:hover{color:var(--ink-2);background:var(--hull-2)}
+.camtab[aria-pressed="true"]{background:var(--hull-3);color:var(--deep)}
+.minibtn[data-on="true"]{border-color:var(--deep-dim);color:var(--deep)}
+.minibtn[data-on="false"]{border-color:var(--rule-2);color:var(--ink-3)}
+.pad-tools{gap:6px}
 .pad-hint{
   position:absolute;bottom:5px;left:0;right:0;text-align:center;
   font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
@@ -536,6 +588,150 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .ax-d[data-hot="true"]{color:var(--warn)}
 
 /* kuvvet geri bildirimi */
+/* PWM çıkış ayarı — servo sürüş oranı */
+.pwm{
+  background:var(--hull-2);
+  border:1px solid var(--rule);border-radius:var(--r);
+  padding:8px 10px 10px;margin-bottom:9px;
+}
+.pwm-hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.pwm-hd .k{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.pwm-hd .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:15px;font-weight:500;color:var(--deep)}
+.pwm[data-low="true"] .pwm-hd .v{color:var(--warn)}
+.pwm input{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:4px;border-radius:2px;margin:9px 0 0;
+  background:linear-gradient(90deg,var(--deep) 0 var(--fill,62%),var(--rule) var(--fill,62%) 100%);
+}
+.pwm input::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--deep);border:2px solid var(--hull-2);cursor:pointer;
+}
+.pwm input::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--deep);border:2px solid var(--hull-2);cursor:pointer;
+}
+.pwm-meta{
+  display:flex;justify-content:space-between;
+  margin-top:6px;
+  font-family:var(--mono);font-size:10px;color:var(--ink-3);
+}
+
+/* giriş kaynağı sekmesi — joystick / klavye */
+.intabs{
+  display:flex;gap:3px;
+  background:var(--abyss);border:1px solid var(--rule);
+  border-radius:var(--r);padding:3px;margin-bottom:10px;
+}
+.intab{
+  flex:1;padding:6px 10px;border-radius:2px;
+  font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);
+}
+.intab:hover{color:var(--ink-2);background:var(--hull-2)}
+.intab[aria-selected="true"]{background:var(--hull-3);color:var(--deep)}
+
+/* klavye tuş haritası */
+.keymap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kgrp{background:var(--hull-2);border:1px solid var(--rule);border-radius:2px;padding:8px 6px 9px}
+.kgrp .kt{
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);text-align:center;margin-bottom:8px;
+}
+.krow{display:flex;gap:4px;justify-content:center;margin-top:4px}
+kbd{
+  display:grid;place-items:center;
+  min-width:26px;height:26px;padding:0 5px;
+  background:var(--hull);border:1px solid var(--rule-2);
+  border-bottom-width:2px;border-radius:3px;
+  font-family:var(--mono);font-size:12px;color:var(--ink-2);
+  transition:background .06s,color .06s,border-color .06s;
+}
+kbd.wide{min-width:76px;font-size:10px;letter-spacing:.08em}
+kbd.on{background:var(--arc);border-color:var(--arc);color:#140902}
+.mousepad{margin-top:8px}
+.mpad{
+  position:relative;height:74px;margin-top:5px;
+  cursor:default;
+  background:
+    linear-gradient(var(--rule),var(--rule)) center/1px 100% no-repeat,
+    linear-gradient(var(--rule),var(--rule)) center/100% 1px no-repeat,
+    var(--abyss);
+  border:1px solid var(--rule-2);border-radius:var(--r);
+  overflow:hidden;
+}
+.mpad .mdot{
+  position:absolute;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;
+  background:var(--arc);border-radius:50%;
+  box-shadow:0 0 10px rgba(255,138,31,.7),0 0 0 2px var(--abyss);
+  left:50%;top:50%;cursor:grab;
+}
+/* tutma alanını görünür kılan halka */
+.mpad .mdot::after{
+  content:"";position:absolute;top:50%;left:50%;
+  width:38px;height:38px;margin:-19px 0 0 -19px;
+  border:1px dashed rgba(255,138,31,.35);border-radius:50%;
+}
+.mpad.tutuluyor .mdot{cursor:grabbing;box-shadow:0 0 16px rgba(255,138,31,.9),0 0 0 2px var(--abyss)}
+.mpad.tutuluyor .mdot::after{border-color:rgba(255,138,31,.75)}
+.mpad .mhint{
+  position:absolute;inset:auto 0 6px;text-align:center;
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  pointer-events:none;transition:opacity .3s;
+}
+.mpad.touched .mhint{opacity:0}
+.mlabels{
+  display:flex;justify-content:space-between;margin-top:4px;
+  font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+}
+.keyhint{
+  display:flex;gap:8px;justify-content:center;margin-top:8px;
+  font-size:10px;letter-spacing:.06em;color:var(--ink-3);
+}
+.keyhint b{color:var(--ink-2);font-weight:500}
+
+/* klavye modunda pedler salt gösterge olur */
+.pad[data-live="false"]{cursor:default;opacity:.9}
+
+/* ark tetiği — operatör modunda arkı yakan/söndüren tek kontrol */
+.trigger{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:10px;margin-bottom:11px;
+  border:1px solid var(--arc-dim);border-radius:var(--r);
+  background:#1D1108;color:var(--arc);
+  font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  transition:background .13s,border-color .13s,color .13s;
+}
+.trigger::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--arc);box-shadow:0 0 9px var(--arc)}
+.trigger:hover{background:#2B1A0C;border-color:var(--arc)}
+.trigger[data-on="false"]{background:var(--hull-2);border-color:var(--rule-2);color:var(--ink-3)}
+.trigger[data-on="false"]::before{background:var(--rule-2);box-shadow:none}
+.trigger:disabled{opacity:.45;cursor:not-allowed}
+
+/* koruma alarmı */
+.alarm{
+  position:absolute;top:0;left:0;right:0;z-index:5;
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;
+  background:linear-gradient(180deg,#3A0F0C,#240908);
+  border-bottom:1px solid var(--crit);
+}
+.alarm .ico{
+  width:22px;height:22px;flex:none;border-radius:50%;
+  background:var(--crit);color:#1A0605;
+  display:grid;place-items:center;font-weight:700;font-size:14px;
+  animation:pulse 1s ease-in-out infinite;
+}
+.alarm .txt{min-width:0;flex:1}
+.alarm .t{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#FF9A92}
+.alarm .m{font-family:var(--mono);font-size:11px;color:#E2B7B3;margin-top:2px}
+.alarm .rst{
+  flex:none;padding:6px 12px;border:1px solid #7A2A24;border-radius:2px;
+  background:#160605;color:#FF8078;
+  font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+}
+.alarm .rst:hover{background:#2A0F0D;color:#FFA79F}
+
 .force{margin-top:11px;padding-top:10px;border-top:1px solid var(--rule)}
 .force-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
 .force-hd .k{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
@@ -712,7 +908,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
       <section class="card torch">
         <div class="card-hd">
           <h2>Torç Sayacı</h2>
-          <span class="hd-note" id="torch-mode">MMA · 3.2 mm</span>
+          <span class="hd-note" id="torch-mode">MMA · 3.2 mm</span><!-- REF.cap -->
         </div>
         <div class="torch-body">
           <div class="torch-main">
@@ -744,6 +940,18 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
             <div class="tg"><div class="k">Torç sıcaklığı</div><div class="v num" id="arc-temp">68<span class="u">°C</span></div></div>
           </div>
 
+          <div class="omur" id="omur" data-s="ok">
+            <div class="omur-hd">
+              <span>Torç ömrü</span>
+              <b><span id="omur-pct">%100</span> · <span id="omur-kalan">58 s</span></b>
+            </div>
+            <div class="omur-bar"><i id="omur-fill" style="width:100%"></i></div>
+            <div class="omur-meta">
+              <span id="omur-kosul">180 A · 12 °C · 20 m</span>
+              <span id="omur-tahmin">tahmini 58 s</span>
+            </div>
+          </div>
+
           <div class="elec">
             <div class="elec-hd"><span>Elektrot</span><b><span id="elec-used">7</span> / 24</b></div>
             <div class="elec-bar" id="elec-bar"></div>
@@ -766,13 +974,22 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
       <div class="viewport">
         <canvas id="feed"></canvas>
 
+        <div class="alarm" id="alarm" hidden>
+          <span class="ico">!</span>
+          <span class="txt">
+            <span class="t">Koruma devrede — ark kesildi</span>
+            <span class="m" id="alarm-msg"></span>
+          </span>
+          <button class="rst" id="alarm-reset">Sıfırla</button>
+        </div>
+
         <div class="hud">
           <span class="br tl"></span><span class="br tr"></span>
           <span class="br bl"></span><span class="br br2"></span>
 
           <div class="hud-top">
             <div class="cam-id"><span id="cam-name">TORÇ KAMERASI</span> · 1080p60</div>
-            <div class="rec">KAYIT <span class="num" id="rec-time">00:12:04</span></div>
+            <div class="rec" id="rec" data-on="true">KAYIT <span class="num" id="rec-time">00:12:04</span></div>
           </div>
 
           <div class="retic" id="retic"><span class="core"></span></div>
@@ -782,8 +999,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
           </div>
 
           <div class="det" id="det" hidden>
-            <div class="det-box" style="left:31%;top:44%;width:38%;height:15%" data-label="dikiş  %96"></div>
-            <div class="det-box sec" style="left:24%;top:31%;width:53%;height:41%" data-label="boru · Ø 610 mm"></div>
+            <div class="det-box sec" id="det-boru" data-label="boru · Ø 610 mm"></div>
+            <div class="det-box" id="det-dikis" data-label="dikiş  %96"></div>
             <svg style="position:absolute;inset:0;width:100%;height:100%">
               <polyline points="0,0" id="seam-path" fill="none" stroke="#FF8A1F" stroke-width="2"
                         stroke-dasharray="5 4" opacity=".85"/>
@@ -794,7 +1011,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
             <div class="hud-read">
               <div><span>DER</span> <b class="num" id="hud-depth">18.4 m</b></div>
               <div><span>YÖN</span> <b class="num" id="hud-hdg">137°</b></div>
-              <div><span>MSF</span> <b class="num" id="hud-dist">0.42 m</b></div>
+              <div><span>TORÇ MSF</span> <b class="num" id="hud-dist">3 mm</b></div>
             </div>
             <div class="hud-read">
               <div><span>IŞIK</span> <b class="num" id="hud-light">70%</b></div>
@@ -807,8 +1024,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
       <div class="camctl">
         <div class="camtabs" role="group" aria-label="Kamera seçimi">
           <button class="camtab" aria-pressed="true"  data-cam="torc">Torç</button>
-          <button class="camtab" aria-pressed="false" data-cam="on">Ön</button>
-          <button class="camtab" aria-pressed="false" data-cam="alt">Alt</button>
+          <button class="camtab" aria-pressed="false" data-cam="kol">Kol · 3. şahıs</button>
         </div>
         <span class="sep"></span>
         <div class="slider">
@@ -818,13 +1034,14 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
         </div>
         <span class="sep"></span>
         <div class="slider">
-          <label for="zoom">Yakınlaştırma</label>
+          <label for="zoom">Zoom</label>
           <input type="range" id="zoom" min="10" max="40" value="10">
           <output for="zoom" id="zoom-out" class="num">1.0×</output>
         </div>
         <span class="sep"></span>
+        <button class="iconbtn" id="recbtn" data-on="true">Kaydı durdur</button>
         <button class="iconbtn" id="snap">Kare yakala</button>
-        <button class="iconbtn" id="markbtn">İşaret bırak</button>
+        <button class="iconbtn" id="markbtn">İşaret bırak <b id="mark-say">0</b></button>
       </div>
     </div>
 
@@ -839,21 +1056,77 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
         </div>
         <div class="fb-body">
 
-          <div class="pads">
+          <button class="trigger" id="trigger" data-on="true">Ark yanıyor — söndür</button>
+
+          <div class="pwm" id="pwm-box" data-low="false">
+            <div class="pwm-hd">
+              <span class="k">PWM çıkışı</span>
+              <span class="v num" id="pwm-val">%62</span>
+            </div>
+            <input type="range" id="pwm" min="0" max="100" value="62"
+                   aria-label="PWM çıkış oranı">
+            <div class="pwm-meta">
+              <span>50 Hz</span>
+              <span id="pwm-us">1620 µs</span>
+              <span>servo sürüş</span>
+            </div>
+          </div>
+
+          <div class="intabs" role="tablist" aria-label="Giriş kaynağı">
+            <button class="intab" role="tab" aria-selected="true"  data-giris="joystick">Joystick</button>
+            <button class="intab" role="tab" aria-selected="false" data-giris="klavye">Klavye</button>
+          </div>
+
+          <div class="pads" id="pads">
             <div class="pad-wrap">
-              <div class="pad-cap"><span>Sol kol · X/Y</span><b id="pad-l-val">0.00 0.00</b></div>
-              <div class="pad" id="pad-l" data-axis="xy">
+              <div class="pad-cap"><span>Sol · X/Y</span><b id="pad-l-val">0.00 0.00</b></div>
+              <div class="pad" id="pad-l" data-axis="xy" data-live="true"
+                   aria-label="Sol kol komut pedi">
+                <svg class="link"><line stroke="rgba(255,138,31,.45)" stroke-width="1" stroke-dasharray="3 3"/></svg>
                 <span class="cmd"></span><span class="act"></span>
-                <span class="pad-hint">sürükle</span>
+                <span class="pad-hint">sürükle · torcu yürüt</span>
               </div>
             </div>
             <div class="pad-wrap">
-              <div class="pad-cap"><span>Sağ kol · Z/Dönüş</span><b id="pad-r-val">0.00 0.00</b></div>
-              <div class="pad" id="pad-r" data-axis="zr">
+              <div class="pad-cap"><span>Sağ · Z/R</span><b id="pad-r-val">0.00 0.00</b></div>
+              <div class="pad" id="pad-r" data-axis="zr" data-live="true"
+                   aria-label="Sağ kol komut pedi">
+                <svg class="link"><line stroke="rgba(255,138,31,.45)" stroke-width="1" stroke-dasharray="3 3"/></svg>
                 <span class="cmd"></span><span class="act"></span>
-                <span class="pad-hint">sürükle</span>
+                <span class="pad-hint">sürükle · torcu eğ</span>
               </div>
             </div>
+          </div>
+
+          <div class="keymap" id="keymap" hidden>
+            <div class="kgrp">
+              <div class="kt">Sol kol · torcu yürüt</div>
+              <div class="krow"><kbd data-k="w">W</kbd></div>
+              <div class="krow"><kbd data-k="a">A</kbd><kbd data-k="s">S</kbd><kbd data-k="d">D</kbd></div>
+            </div>
+            <div class="kgrp">
+              <div class="kt">Sağ kol · torcu eğ</div>
+              <div class="krow"><kbd data-k="arrowup">↑</kbd></div>
+              <div class="krow"><kbd data-k="arrowleft">←</kbd><kbd data-k="arrowdown">↓</kbd><kbd data-k="arrowright">→</kbd></div>
+            </div>
+          </div>
+          <div class="mousepad" id="mousepad" hidden>
+            <div class="pad-cap"><span>Fare · Servo 5 / 6</span><b id="mouse-val">63.0° 38%</b></div>
+            <div class="mpad" id="mpad">
+              <span class="mdot"></span>
+              <span class="mhint">noktayı tut ve sürükle</span>
+            </div>
+            <div class="mlabels"><span>← torç açısı →</span><span>↕ kıskaç</span></div>
+          </div>
+
+          <div class="keyhint" id="keyhint" hidden>
+            <span><kbd class="wide" data-k=" ">Boşluk</kbd> <b>ark tetiği</b></span>
+            <span><kbd data-k="h">H</kbd> <b>ev pozu</b></span>
+          </div>
+
+          <div class="pad-tools">
+            <button class="minibtn" id="autocenter" data-on="true">Oto merkez · açık</button>
+            <button class="minibtn" id="center">Kolu merkeze çek</button>
           </div>
 
           <div class="legend">
@@ -982,53 +1255,124 @@ const SENSORS = [
     { id:"suSic",    l:"Su sıcaklığı",   u:"°C",  v:11.2, min:0,  max:30,  d:1 },
     { id:"basinc",   l:"Basınç",         u:"bar", v:2.84, min:0,  max:5,   d:2 },
     { id:"bulanik",  l:"Bulanıklık",     u:"NTU", v:1.2,  min:0,  max:10,  d:1, warn:4 },
+    { id:"uzaklik",  l:"Uzaklık (sonar)", u:"cm",  v:16,   min:0,  max:120, d:1, low:5, lowCrit:2 },
   ]},
   { g: "Gövde", items: [
-    { id:"icSic",    l:"İç sıcaklık",    u:"°C",  v:42.6, min:0,  max:80,  d:1, warn:55, crit:68 },
+    { id:"icSic",    l:"İç sıcaklık",    u:"°C",  v:42.6, min:0,  max:90,  d:1, warn:55, crit:68, kes:"İç sıcaklık sınırı (68 °C)" },
     { id:"nem",      l:"Nem",            u:"%",   v:38,   min:0,  max:100, d:0, warn:65 },
     { id:"sizinti",  l:"Sızıntı",        flag:"YOK" },
-    { id:"batarya",  l:"Batarya",        u:"%",   v:78,   min:0,  max:100, d:0, low:25, lowCrit:12 },
+    { id:"batarya",  l:"Batarya",        u:"%",   v:78,   min:0,  max:100, d:0, low:25, lowCrit:12, kes:"Batarya kritik (%12)" },
     { id:"hatVolt",  l:"Hat voltajı",    u:"V",   v:48.2, min:0,  max:60,  d:1 },
     { id:"cekilen",  l:"Çekilen akım",   u:"A",   v:6.4,  min:0,  max:20,  d:1 },
   ]},
   { g: "Duruş", compact: true, items: [
-    { id:"yatis",    l:"Yatış",          u:"°",   v:-2.1, min:-30, max:30, d:1 },
-    { id:"yunus",    l:"Yunuslama",      u:"°",   v:4.8,  min:-30, max:30, d:1 },
-    { id:"yon",      l:"Yön",            u:"°",   v:137,  min:0,   max:360,d:0 },
+    { id:"yatis",    l:"Roll",           u:"°",   v:-2.1, min:-30, max:30, d:1 },
+    { id:"yunus",    l:"Pitch",          u:"°",   v:4.8,  min:-30, max:30, d:1 },
+    { id:"yon",      l:"Yaw",            u:"°",   v:137,  min:0,   max:360,d:0 },
   ]},
   { g: "Kaynak hattı", items: [
     { id:"kayAkim",  l:"Kaynak akımı",   u:"A",   v:178,  min:0, max:300, d:0, arc:true },
     { id:"arkVolt",  l:"Ark voltajı",    u:"V",   v:26.4, min:0, max:40,  d:1, arc:true },
     { id:"telHiz",   l:"Tel besleme",    u:"m/dk",v:4.2,  min:0, max:10,  d:1, arc:true },
-    { id:"torcSic",  l:"Torç sıcaklığı", u:"°C",  v:68,   min:0, max:150, d:0, warn:110, crit:135 },
+    { id:"torcSic",  l:"Torç sıcaklığı", u:"°C",  v:68,   min:0, max:150, d:0, warn:110, crit:135, kes:"Torç sıcaklığı sınırı (135 °C)" },
   ]},
 ];
 
-/* eksenler: operatör komutunun kolda karşılığı */
+/* Eksenler: operatör komutunun kolda karşılığı.
+   Adları değiştirmek için sadece `l` alanını düzenle — id'ler kodun geri
+   kalanında (komut eşlemesi, ROS joint adları) kullanılıyor. */
 const AXES = [
-  { id:"omuz",  l:"Omuz",        min:-90,  max:90,  t:24,  a:24  },
-  { id:"dirsek",l:"Dirsek",      min:-120, max:120, t:-46, a:-46 },
-  { id:"bilekD",l:"Bilek dönüş", min:-180, max:180, t:12,  a:12  },
-  { id:"bilekE",l:"Bilek eğim",  min:-90,  max:90,  t:-8,  a:-8  },
-  { id:"torc",  l:"Torç açısı",  min:0,    max:90,  t:63,  a:63  },
-  { id:"kiskac",l:"Kıskaç",      min:0,    max:100, t:38,  a:38  },
+  { id:"servo1", l:"Servo 1", min:-90,  max:90,  t:24,  a:24  },
+  { id:"servo2", l:"Servo 2", min:-120, max:120, t:-46, a:-46 },
+  { id:"servo3", l:"Servo 3", min:-180, max:180, t:12,  a:12  },
+  { id:"servo4", l:"Servo 4", min:-90,  max:90,  t:-8,  a:-8  },
+  { id:"servo5", l:"Servo 5", min:0,    max:90,  t:63,  a:63  },
+  { id:"servo6", l:"Servo 6", min:0,    max:100, t:38,  a:38  },
 ];
+
+/* ══════════════ 1b. TORÇ / ELEKTROT ÖMÜR MODELİ ══════════════
+   Islak sualtı kaynağında (SMAW) elektrot tüketimini belirleyen etkenler:
+
+   • KAYNAK AKIMI — baskın etken. Erime hızı MR = a·I + b·L·I² bağıntısıyla
+     akımla süperlineer artar (dirençsel I²R ısınması). Üs 1.35 alındı.
+   • DERİNLİK — basınç arkı sıkıştırır, ark gerilimi her 10 m'de ~1–2 V
+     yükselir, tüketim artar (~%6 / 10 m).
+   • SU SICAKLIĞI — soğuk su daha hızlı söndürür, arkı sürdürmek biraz daha
+     enerji ister. İkincil etki (~%0.4 / °C).
+   • ARK GERİLİMİ — uzun ark, daha çok sıçrama ve kayıp.
+   • ELEKTROT ÇAPI — kütle kesit alanıyla, yani çapın karesiyle artar.
+
+   ── KALİBRASYON ────────────────────────────────────────────────────────
+   Aşağıdaki REF bloğu bir referans noktasıdır, sahadan veri topladıkça
+   DEĞİŞTİRİLECEK tek yer burasıdır. Şu anki değer, 3.2 mm elektrotun
+   180 A'de yaklaşık 55-60 s ark süresi vermesi pratiğine dayanıyor.
+   Gerçek dalış verisiyle: her elektrot için (ark süresi, ortalama akım,
+   su sıcaklığı, derinlik) dörtlüsünü kaydet, sonra REF.omur'u ve üsleri
+   en küçük kareler ile oturt.
+   ─────────────────────────────────────────────────────────────────────── */
+const REF = {
+  cap: 3.2,        // mm — elektrot çapı
+  akim: 180,       // A
+  suSic: 12,       // °C
+  derinlik: 20,    // m
+  volt: 26,        // V
+  omur: 58,        // s — referans koşulda toplam ark süresi
+};
+
+/* Verilen koşulda bir elektrotun toplam ark ömrünü (saniye) tahmin eder. */
+function torcOmruTahmini({ akim, suSic, derinlik, volt, cap = REF.cap }) {
+  const fAkim = Math.pow(clamp(akim, 40, 400) / REF.akim, 1.35);
+  const fSu   = clamp(1 + (REF.suSic - suSic) * 0.004, .85, 1.20);
+  const fDer  = clamp(1 + (derinlik - REF.derinlik) * 0.006, .80, 1.60);
+  const fVolt = clamp(1 + (volt - REF.volt) / REF.volt * 0.15, .85, 1.25);
+  const fCap  = Math.pow(cap / REF.cap, 2);      // kalın elektrot daha uzun dayanır
+
+  const saniye = clamp(REF.omur * fCap / (fAkim * fSu * fDer * fVolt), 5, 600);
+  return { saniye, hiz: 1 / saniye, etkenler: { fAkim, fSu, fDer, fVolt, fCap } };
+}
+
+/* Anlık ölçümleri modele bağlayan yardımcı. */
+function omurKosulu() {
+  const g = id => SENSORS.flatMap(x => x.items).find(x => x.id === id).v;
+  return { akim: g("kayAkim"), suSic: g("suSic"), derinlik: g("derinlik"),
+           volt: g("arkVolt"), cap: REF.cap };
+}
+
+const DIKIS_BOLME = 170;   // dikiş boyunca kaynak izi kovası sayısı
 
 /* ══════════════ 2. DURUM ══════════════ */
 const state = {
   mod: "op",                 // "op" | "oto"
+  giris: "joystick",         // "joystick" | "klavye"
+  otoMerkez: true,           // kapalıysa joystick bırakıldığı yerde kalır
+  fare: { x: .70, y: .62 },  // klavye modunda Servo 5/6 fareden gelir (0..1)
+  pwm: 62,                   // servo sürüş oranı (%) — hareket hızını ölçekler
   arkAktif: true,
   acilDurdu: false,
-  kamera: "torc",
+  alarm: null,               // koruma devredeyse sebep metni
+  gorevDurdu: false,         // otonom görev duraklatıldı mı
+  kamera: "torc",            // "torc" | "kol"
+  kayit: true,               // video kaydı açık mı
+  isaretler: [],             // operatörün dikiş üzerine bıraktığı işaretler
   isik: 70,
   zoom: 1.0,
   torc: { toplam: 148, dalis: 12, sure: 277, elektrot: 7, elektrotTop: 24 },
+  omur: 1,                   // kullanılan elektrotta kalan ömür kesri (0..1)
   gecikme: 34,
   kuvvet: 14.2,
   temas: false,
   kiskac: 38,
   komut: { lx: 0, ly: 0, rx: 0, ry: 0 },   // operatörün istediği (-1..1)
   gercek:{ lx: 0, ly: 0, rx: 0, ry: 0 },   // kolun ulaştığı
+  /* Torcun kadraj içindeki yeri — joystick doğrudan burayı sürer.
+     x: dikiş boyunca ilerleme (0..1), yuk: dikişten uzaklık (px), aci: eğim */
+  torc3d: { x: .20, yuk: 0, aci: -.42 },
+  /* Kaynak izi dikiş boyunca bir kova haritasıdır, tek bir "en uzak nokta"
+     DEĞİL. Arkı söndürüp ilerlemek iz bırakmaz; sonra yakınca da aradaki
+     boşluk kaynaklanmış görünmez. */
+  kaynakIzi: (() => { const a = new Uint8Array(DIKIS_BOLME);
+                      a.fill(1, 0, Math.round(DIKIS_BOLME * .20)); return a; })(),
+  sonKaynakX: null,                        // son işaretlenen konum (boşluk köprülememek için)
   akimGecmisi: Array.from({ length: 60 }, () => 170 + Math.random() * 18),
   sayac: { kayit: 724, calisma: 6442 },
 };
@@ -1072,6 +1416,13 @@ const AX = new Map();
 $$(".ax", axesEl).forEach(el => AX.set(el.dataset.id, {
   el, fill: $(".fill", el), tgt: $(".tgt", el), v: $(".ax-v", el), d: $(".ax-d", el),
 }));
+
+/* Kontrol kaynağı ya da mod devrinde kolu durdurur: hem komutu hem kolun
+   ulaştığı değeri sıfırlar, yoksa kol önceki komutun ataletiyle kaymaya
+   devam eder. */
+function komutuSifirla() {
+  for (const k of ["lx", "ly", "rx", "ry"]) state.komut[k] = state.gercek[k] = 0;
+}
 
 /* ══════════════ 4. ÇİZİM ══════════════ */
 function sensorDurum(s) {
@@ -1137,6 +1488,21 @@ function renderSpark() {
   e.setAttribute("cx", W); e.setAttribute("cy", y(h[h.length - 1]));
 }
 
+function renderOmur() {
+  const k = omurKosulu();
+  const t = torcOmruTahmini(k);
+  const pct = state.omur * 100;
+  const box = $("#omur");
+
+  box.dataset.s = pct < 12 ? "crit" : pct < 30 ? "warn" : "ok";
+  $("#omur-fill").style.width = `${pct}%`;
+  $("#omur-pct").textContent  = `%${pct.toFixed(0)}`;
+  $("#omur-kalan").textContent = `${(state.omur * t.saniye).toFixed(0)} s`;
+  $("#omur-kosul").textContent =
+    `${k.akim.toFixed(0)} A · ${k.suSic.toFixed(0)} °C · ${k.derinlik.toFixed(0)} m`;
+  $("#omur-tahmin").textContent = `tahmini ${t.saniye.toFixed(0)} s`;
+}
+
 function renderForce() {
   const cells = $$("#force-bar i"), n = cells.length;
   const lvl = Math.round(clamp(state.kuvvet / 40, 0, 1) * n);
@@ -1158,7 +1524,8 @@ function applyTelemetry(patch = {}) {
     if (p) { if (p.t != null) a.t = p.t; if (p.a != null) a.a = p.a; }
   }
   Object.assign(state, patch.durum || {});
-  renderSensors(); renderAxes(); renderTorch(); renderSpark(); renderForce(); renderHud();
+  renderSensors(); renderAxes(); renderTorch(); renderSpark(); renderForce();
+  renderOmur(); renderHud();
 }
 
 /* ══════════════ 6. HUD METİNLERİ ══════════════ */
@@ -1168,7 +1535,10 @@ function renderHud() {
   $("#hud-hdg").textContent   = `${s("yon").toFixed(0)}°`;
   $("#hud-vis").textContent   = `${s("bulanik").toFixed(1)} NTU`;
   $("#hud-light").textContent = `${state.isik}%`;
-  $("#hud-dist").textContent  = `${(0.42 - state.gercek.ry * 0.12).toFixed(2)} m`;
+  const uzak = Math.abs(state.torc3d.yuk);
+  const d = $("#hud-dist");
+  d.textContent = `${(3 + uzak * .55).toFixed(0)} mm`;
+  d.style.color = uzak > 26 ? "#FF8078" : "";      // ark kopma sınırı
   $("#fb-lat").textContent    = `gecikme ${state.gecikme} ms`;
   $("#lat").textContent       = `${state.gecikme} ms`;
 }
@@ -1190,116 +1560,366 @@ function resizeCanvas() {
 }
 new ResizeObserver(resizeCanvas).observe(cv);
 
-function seamY(x, t) {          // dikişin dalgalı ekseni
-  return Math.sin(x * 0.011 + 0.6) * 6 + Math.sin(x * 0.031 + t * 0.0004) * 2.5;
+/* ══════════════ 7b. 3B SAHNE ══════════════
+   Dünya eksenleri:  X = boru ekseni (dikiş yönü) · Y = yukarı · Z = derinlik.
+   Boru, X boyunca uzanan R yarıçaplı bir silindir; dikiş tepesinde (θ≈0)
+   hafif dalgalanarak ilerler. Her şey perspektif projeksiyonla çizilir, yani
+   kamerayı değiştirmek sahneyi başka bir yerden GERÇEKTEN gösterir.        */
+
+const R_BORU = 78;        // boru yarıçapı (dünya birimi)
+const BORU_YARI = 620;    // borunun X yönünde yarı uzunluğu
+/* ── KOL: SO-ARM100 (The Robot Studio) örnek alınmıştır ──────────────────
+   5 eklem + kıskaç, Feetech STS3215 seri veri yolu servoları, 3B baskı
+   braket bağlantılar. Eklem dizilimi Servo 1-6'ya karşılık gelir:
+     Servo 1  Shoulder Pan    (omuz dönüş, dikey eksen)
+     Servo 2  Shoulder Lift   (omuz kaldırma)
+     Servo 3  Elbow Flex      (dirsek)
+     Servo 4  Wrist Flex      (bilek eğim)
+     Servo 5  Wrist Roll      (bilek dönüş — burada torç açısı)
+     Servo 6  Gripper         (kıskaç — elektrotu tutar)
+   Omuz/dirsek açıları torcun ucuna ters kinematikle çözülür; bilek, kıskaç
+   ve elektrot doğrudan Servo 4-6'nın gerçekleşen değerlerinden çizilir.
+   Gerçek kinematik geldiğinde bu blok tümüyle FK'ya çevrilecek. */
+const KOL = {
+  L1: 265,      // omuz → dirsek
+  L2: 245,      // dirsek → bilek + elektrot
+  elektrot: 96, // kıskaçtan çıkan elektrot boyu
+  geri: 300, yuk: 300, z: -260,
+};
+
+/* ── Yönlendirilmiş 3B kutu (baskı braket / servo gövdesi) ──
+   İki nokta arasına w×h kesitli bir prizma çizer; yüzler derinliğe göre
+   sıralanıp normaline göre gölgelenir. */
+function slabCiz(P, a, b, w, h, taban) {
+  const ileri = vBirim(vCikar(b, a));
+  const yardim = Math.abs(ileri[1]) > .92 ? [1, 0, 0] : [0, 1, 0];
+  const sag = vBirim(vCapraz(ileri, yardim));
+  const ust = vCapraz(sag, ileri);
+  const kose = [];
+  for (const p of [a, b])
+    for (const [sy, uy] of [[-1,-1],[1,-1],[1,1],[-1,1]])
+      kose.push(vEkle(p, vEkle(vCarp(sag, sy * w), vCarp(ust, uy * h))));
+
+  const YUZ = [[0,1,2,3],[7,6,5,4],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]];
+  const IS = vBirim([-.3, .82, -.48]);
+  const cizilecek = [];
+  for (const f of YUZ) {
+    const q = f.map(i => P(kose[i]));
+    if (!q.every(Boolean)) continue;
+    const n = vBirim(vCapraz(vCikar(kose[f[1]], kose[f[0]]), vCikar(kose[f[2]], kose[f[0]])));
+    const z = (q[0].z + q[1].z + q[2].z + q[3].z) / 4;
+    cizilecek.push({ q, lam: .38 + .62 * Math.abs(vNokta(n, IS)), z });
+  }
+  cizilecek.sort((x, y) => y.z - x.z);
+  for (const { q, lam, z } of cizilecek) {
+    ctx.beginPath();
+    q.forEach((v, i) => i ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y));
+    ctx.closePath();
+    ctx.fillStyle = suRengi(taban[0] * lam, taban[1] * lam, taban[2] * lam, z);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(4,9,12,.75)"; ctx.lineWidth = 1; ctx.stroke();
+  }
+}
+
+/* vektör yardımcıları */
+const vEkle  = (a,b) => [a[0]+b[0], a[1]+b[1], a[2]+b[2]];
+const vCikar = (a,b) => [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
+const vCarp  = (a,k) => [a[0]*k, a[1]*k, a[2]*k];
+const vNokta = (a,b) => a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+const vCapraz= (a,b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+const vBoy   = a => Math.hypot(a[0], a[1], a[2]);
+const vBirim = a => { const l = vBoy(a) || 1; return [a[0]/l, a[1]/l, a[2]/l]; };
+
+/* dikişin boru yüzeyindeki açısı ve 3B noktası */
+const dikisAci = x => Math.sin(x * .006) * .10 + Math.sin(x * .017) * .04;
+function dikisNokta(x) {
+  const th = dikisAci(x);
+  return [x, R_BORU * Math.cos(th), R_BORU * Math.sin(th)];
+}
+const dikisNormal = x => { const th = dikisAci(x); return [0, Math.cos(th), Math.sin(th)]; };
+
+/* Joystick'in sürdüğü ilerlemeyi boru üzerindeki X'e çevirir.
+   İşaret ters: kameraların bakış yönünde dünya +X ekranda SOLA düşüyor, bu
+   yüzden artan ilerlemenin ekranda sağa gitmesi için X azalmalı. */
+const ilerlemeX = f => (.5 - f) * 2 * BORU_YARI * .78;
+
+/* torcun ucu: dikiş noktası + yüzey normali yönünde yükseklik */
+function torcUcu() {
+  const x = ilerlemeX(state.torc3d.x);
+  return vEkle(dikisNokta(x), vCarp(dikisNormal(x), state.torc3d.yuk * .95));
+}
+
+/* göz + hedef -> ortonormal kamera çerçevesi */
+function kameraCercevesi(goz, hedef) {
+  const ileri = vBirim(vCikar(hedef, goz));
+  const sag   = vBirim(vCapraz(ileri, [0, 1, 0]));
+  return { goz, ileri, sag, yuk: vCapraz(sag, ileri) };
+}
+
+/* İKİ KAMERA — torç kamerası kolun ucunda, kol kamerası dışarıda sabit. */
+function aktifKamera() {
+  const uc = torcUcu();
+  if (state.kamera === "kol") {
+    /* 3. şahıs: ROV'un yanından, kolu ve boruyu birlikte gören bakış */
+    return {
+      K: kameraCercevesi([uc[0] - 250, 395, -880], [uc[0] + 55, 95, 0]),
+      olcek: .86, xa: -BORU_YARI, xb: BORU_YARI, kolCiz: true,
+    };
+  }
+  /* torç kamerası: kolun ucunda, torcun gerisinden dikiş boyunca ileri bakar */
+  return {
+    K: kameraCercevesi([uc[0] - 250, uc[1] + 175, uc[2] - 340],
+                       [uc[0] + 95, R_BORU * .72, 0]),
+    olcek: 1.0,
+    xa: Math.max(-BORU_YARI, uc[0] - 240),
+    xb: Math.min(BORU_YARI, uc[0] + 900),
+    kolCiz: false,
+  };
+}
+
+/* perspektif projeksiyon — kameranın arkasındaki nokta için null */
+function projekte(p, K, olcek) {
+  const d = vCikar(p, K.goz);
+  const z = vNokta(d, K.ileri);
+  if (z < 14) return null;
+  const k = (H * olcek) / z;
+  return { x: W / 2 + vNokta(d, K.sag) * k, y: H / 2 - vNokta(d, K.yuk) * k, z, k };
+}
+
+/* uzaklığa göre su rengine karışma (sis) */
+const sis = z => clamp((z - 420) / 1500, 0, .60);
+function suRengi(r, g, b, z, a = 1) {
+  const f = sis(z);
+  return `rgba(${Math.round(r + (18 - r) * f)},${Math.round(g + (42 - g) * f)},${Math.round(b + (52 - b) * f)},${a})`;
+}
+
+/* ── kolun eklem noktaları: uca 2 bağlantılı ters kinematik ──
+   Omuz torcun X'ini izler (ROV dikiş boyunca istasyon tutar), böylece hedef
+   her zaman erişilebilir kalır. */
+function kolEklemleri(uc) {
+  const omuz = [uc[0] - KOL.geri, KOL.yuk, KOL.z];
+  const d = vCikar(uc, omuz);
+  const yatay = Math.max(Math.hypot(d[0], d[2]), 1);
+  const yon = [d[0] / yatay, 0, d[2] / yatay];
+  const mesafe = Math.min(Math.hypot(yatay, d[1]), KOL.L1 + KOL.L2 - 4);
+  const taban = Math.atan2(d[1], yatay);
+  const a = Math.acos(clamp((KOL.L1 ** 2 + mesafe ** 2 - KOL.L2 ** 2) / (2 * KOL.L1 * mesafe), -1, 1));
+  const th = taban + a;
+  const dirsek = [
+    omuz[0] + yon[0] * Math.cos(th) * KOL.L1,
+    omuz[1] + Math.sin(th) * KOL.L1,
+    omuz[2] + yon[2] * Math.cos(th) * KOL.L1,
+  ];
+  return { omuz, dirsek, uc };
+}
+
+/* kalın 3B çubuk: iki ucu projekte edip derinliğe göre kalınlıkla çizer */
+function cubukCiz(P, a, b, kalinlik, renk) {
+  const pa = P(a), pb = P(b);
+  if (!pa || !pb) return null;
+  ctx.strokeStyle = renk;
+  ctx.lineWidth = Math.max(1.5, kalinlik * (pa.k + pb.k) / 2);
+  ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.stroke();
+  return { pa, pb };
 }
 
 function drawScene(t) {
   if (!W) return;
   const isik = state.isik / 100;
   const bulanik = SENSORS[0].items[3].v / 10;
-  const cam = state.kamera;
+  const kam = aktifKamera();
+  const K = kam.K;
+  const P = p => projekte(p, K, kam.olcek * state.zoom);
+  const IS = vBirim([-.3, .82, -.48]);          // dalış lambası yönü
+  const uc = torcUcu();
+  const ucP = P(uc);
 
-  /* su */
+  /* ── su ── */
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, "#08202A"); g.addColorStop(.55, "#051219"); g.addColorStop(1, "#020608");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-  /* dalış lambası havuzu */
-  const lg = ctx.createRadialGradient(W * .5, H * .55, 0, W * .5, H * .55, Math.max(W, H) * (.3 + isik * .4));
-  lg.addColorStop(0, `rgba(124,196,214,${.13 * isik})`);
+  /* ── dalış lambası havuzu (torcun bulunduğu yeri aydınlatır) ── */
+  const lx = ucP ? ucP.x : W / 2, ly = ucP ? ucP.y : H * .55;
+  const lg = ctx.createRadialGradient(lx, ly, 0, lx, ly, Math.max(W, H) * (.3 + isik * .42));
+  lg.addColorStop(0, `rgba(124,196,214,${.11 * isik})`);
   lg.addColorStop(1, "rgba(124,196,214,0)");
   ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
 
-  ctx.save();
-  ctx.translate(W / 2, H / 2); ctx.scale(state.zoom, state.zoom); ctx.translate(-W / 2, -H / 2);
+  /* ── boru: θ bantları hâlinde, her bant tek poligon ── */
+  const NT = 22, NX = 24, TH0 = -1.85, TH1 = 1.85;
+  for (let i = 0; i < NT; i++) {
+    const ta = TH0 + (TH1 - TH0) * i / NT;
+    const tb = TH0 + (TH1 - TH0) * (i + 1) / NT;
+    const tm = (ta + tb) * .5;
+    const n = [0, Math.cos(tm), Math.sin(tm)];
+    const orta = [ (kam.xa + kam.xb) / 2, R_BORU * Math.cos(tm), R_BORU * Math.sin(tm) ];
+    if (vNokta(n, vBirim(vCikar(K.goz, orta))) <= .02) continue;   // arka yüz
 
-  if (cam === "alt") {
-    /* deniz tabanı */
-    const sg = ctx.createLinearGradient(0, H * .42, 0, H);
-    sg.addColorStop(0, "#0A1418"); sg.addColorStop(1, "#151A14");
-    ctx.fillStyle = sg; ctx.fillRect(0, H * .42, W, H * .58);
-    for (let i = 0; i < 14; i++) {
-      const rx = ((i * 97) % 100) / 100 * W, ry = H * (.5 + ((i * 37) % 45) / 100);
-      ctx.fillStyle = `rgba(30,40,42,${.5 + (i % 3) * .12})`;
-      ctx.beginPath(); ctx.ellipse(rx, ry, 14 + (i % 5) * 9, 6 + (i % 4) * 4, 0, 0, 7); ctx.fill();
+    const ust = [], alt = [];
+    let zTop = 0, say = 0;
+    for (let j = 0; j <= NX; j++) {
+      const x = kam.xa + (kam.xb - kam.xa) * j / NX;
+      const qa = P([x, R_BORU * Math.cos(ta), R_BORU * Math.sin(ta)]);
+      const qb = P([x, R_BORU * Math.cos(tb), R_BORU * Math.sin(tb)]);
+      if (!qa || !qb) continue;
+      ust.push(qa); alt.push(qb); zTop += qa.z; say++;
     }
-  } else {
-    /* boru gövdesi */
-    const sc  = cam === "torc" ? .30 : .18;
-    const cy  = H * (cam === "torc" ? .52 : .48);
-    const ph  = H * sc;
-    const pg = ctx.createLinearGradient(0, cy - ph, 0, cy + ph);
-    pg.addColorStop(0,   "#060B0E");
-    pg.addColorStop(.06, `rgba(52,74,84,${.5 + isik * .4})`);
-    pg.addColorStop(.30, `rgba(74,102,112,${.78 + isik * .22})`);
-    pg.addColorStop(.47, `rgba(104,138,150,${.82 + isik * .18})`);
-    pg.addColorStop(.66, `rgba(52,74,84,${.85 + isik * .15})`);
-    pg.addColorStop(.94, "rgba(16,26,31,.96)");
-    pg.addColorStop(1,   "#04080A");
-    ctx.fillStyle = pg; ctx.fillRect(0, cy - ph, W, ph * 2);
-    ctx.strokeStyle = `rgba(150,186,200,${.18 + isik * .22})`; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, cy - ph); ctx.lineTo(W, cy - ph); ctx.stroke();
-    ctx.strokeStyle = "rgba(2,5,7,.9)";
-    ctx.beginPath(); ctx.moveTo(0, cy + ph); ctx.lineTo(W, cy + ph); ctx.stroke();
+    if (say < 2) continue;
+    const z = zTop / say;
 
-    /* korozyon dokusu */
-    ctx.globalAlpha = .18;
-    for (let i = 0; i < 60; i++) {
-      const px = ((i * 73) % 100) / 100 * W, py = cy + (((i * 51) % 100) / 100 - .5) * ph * 1.7;
-      ctx.fillStyle = i % 3 ? "#2C3B40" : "#4A3B2A";
-      ctx.fillRect(px, py, 6 + (i % 7) * 4, 1.5 + (i % 3));
-    }
-    ctx.globalAlpha = 1;
-
-    /* dikiş */
+    const lam = Math.max(0, vNokta(n, IS));
+    const ton = .13 + lam * (.40 + isik * .34);
     ctx.beginPath();
-    for (let x = 0; x <= W; x += 6) { const y = cy + seamY(x, t); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
-    ctx.strokeStyle = `rgba(150,178,188,${.32 + isik * .28})`; ctx.lineWidth = 3; ctx.stroke();
-    ctx.strokeStyle = "rgba(8,14,17,.85)"; ctx.lineWidth = 1; ctx.stroke();
+    ust.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y));
+    for (let k = alt.length - 1; k >= 0; k--) ctx.lineTo(alt[k].x, alt[k].y);
+    ctx.closePath();
+    ctx.fillStyle = suRengi(96 * ton + 14, 122 * ton + 20, 132 * ton + 24, z);
+    ctx.fill();
+  }
 
-    /* tamamlanmış kaynak paçavrası (soldan itibaren) */
-    const done = W * .12 + (state.arkAktif ? (t * .008) % (W * .5) : W * .3);
+  /* ── dikiş oluğu ── */
+  const dikisYol = [];
+  for (let x = kam.xa; x <= kam.xb; x += 14) { const q = P(dikisNokta(x)); if (q) dikisYol.push(q); }
+  if (dikisYol.length > 1) {
     ctx.beginPath();
-    for (let x = 0; x <= done; x += 5) { const y = cy + seamY(x, t); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
-    ctx.strokeStyle = `rgba(190,175,150,${.4 + isik * .3})`; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.stroke();
-    for (let x = W * .12; x <= done; x += 9) {
-      ctx.beginPath(); ctx.arc(x, cy + seamY(x, t), 2.6, 0, 7);
-      ctx.fillStyle = `rgba(210,198,176,${.22 + isik * .2})`; ctx.fill();
+    dikisYol.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y));
+    ctx.strokeStyle = `rgba(12,20,24,${.55 + isik * .2})`;
+    ctx.lineWidth = Math.max(1, 3 * dikisYol[0].k); ctx.stroke();
+  }
+
+  /* ── çekilmiş kaynak: SADECE gerçekten kaynak yapılan kovalar ── */
+  for (let i = 0; i < DIKIS_BOLME; i++) {
+    if (!state.kaynakIzi[i]) continue;
+    const x = ilerlemeX((i + .5) / DIKIS_BOLME);
+    if (x < kam.xa || x > kam.xb) continue;
+    const q = P(dikisNokta(x));
+    if (!q) continue;
+    const r = clamp(6.5 * q.k, .8, 13);
+    ctx.beginPath(); ctx.arc(q.x, q.y, r, 0, 7);
+    ctx.fillStyle = suRengi(196, 184, 158, q.z, .32 + isik * .3);
+    ctx.fill();
+  }
+
+  /* ── operatör işaretleri: boru üzerinde numaralı nişanlar ── */
+  state.isaretler.forEach((m, i) => {
+    const x = ilerlemeX(m.f);
+    if (x < kam.xa || x > kam.xb) return;
+    const q0 = P(dikisNokta(x));
+    const q1 = P(vEkle(dikisNokta(x), vCarp(dikisNormal(x), 54)));
+    if (!q0 || !q1) return;
+    ctx.strokeStyle = "rgba(92,184,232,.85)";
+    ctx.lineWidth = Math.max(1, 2.2 * q1.k);
+    ctx.beginPath(); ctx.moveTo(q0.x, q0.y); ctx.lineTo(q1.x, q1.y); ctx.stroke();
+    const r = Math.max(2.5, 8 * q1.k);
+    ctx.beginPath();
+    ctx.moveTo(q1.x, q1.y - r); ctx.lineTo(q1.x + r, q1.y);
+    ctx.lineTo(q1.x, q1.y + r); ctx.lineTo(q1.x - r, q1.y);
+    ctx.closePath();
+    ctx.fillStyle = "#5CB8E8"; ctx.fill();
+    ctx.strokeStyle = "rgba(4,12,18,.9)"; ctx.lineWidth = 1; ctx.stroke();
+    if (r > 5) {
+      ctx.fillStyle = "#04141D";
+      ctx.font = `600 ${Math.round(r * 1.2)}px "IBM Plex Mono", monospace`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(i + 1), q1.x, q1.y + .5);
+    }
+  });
+
+  /* ── robot kol: SO-ARM100 düzeni (yalnızca 3. şahıs kamerada) ── */
+  if (kam.kolCiz) {
+    const E = kolEklemleri(uc);
+    /* ROV gövdesi — 3B kutu (yan + üst yüz), kolun omzuna oturur */
+    const gm = vEkle(E.omuz, [-30, 26, 30]);
+    const B = [112, 48, 86];                       // yarı boyutlar: X, Y, Z
+    const k3 = (dx, dy, dz) => P([gm[0] + dx * B[0], gm[1] + dy * B[1], gm[2] + dz * B[2]]);
+    const yuz = (pts, r, g2, b) => {
+      const q = pts.map(a => k3(...a));
+      if (!q.every(Boolean)) return;
+      ctx.beginPath(); q.forEach((v, i) => i ? ctx.lineTo(v.x, v.y) : ctx.moveTo(v.x, v.y));
+      ctx.closePath();
+      ctx.fillStyle = suRengi(r, g2, b, q[0].z); ctx.fill();
+      ctx.strokeStyle = "rgba(6,12,16,.7)"; ctx.lineWidth = 1; ctx.stroke();
+    };
+    yuz([[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]], 62, 82, 94);   // ön yüz
+    yuz([[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],     98, 122, 136); // üst yüz
+    yuz([[1,-1,-1],[1,-1,1],[1,1,1],[1,1,-1]],     46, 63, 74);   // yan yüz
+
+    const BASKI = [142, 152, 162];   // 3B baskı braket rengi
+    const SERVO = [196, 202, 210];   // STS3215 gövdesi
+
+    /* taban plakası + Servo 1 (Shoulder Pan) */
+    slabCiz(P, vEkle(E.omuz, [0, -34, 0]), vEkle(E.omuz, [0, 4, 0]), 62, 62, SERVO);
+    /* Servo 2 (Shoulder Lift) gövdesi */
+    slabCiz(P, vEkle(E.omuz, [-30, 0, 0]), vEkle(E.omuz, [30, 0, 0]), 30, 30, SERVO);
+
+    /* üst kol braketi (omuz → dirsek) */
+    slabCiz(P, E.omuz, E.dirsek, 26, 20, BASKI);
+
+    /* Servo 3 (Elbow Flex) */
+    const dirYon = vBirim(vCikar(E.uc, E.dirsek));
+    slabCiz(P, vEkle(E.dirsek, vCarp(dirYon, -26)), vEkle(E.dirsek, vCarp(dirYon, 26)), 26, 26, SERVO);
+
+    /* ön kol braketi (dirsek → bilek) */
+    const bilek = vEkle(E.dirsek, vCarp(dirYon, KOL.L2 - KOL.elektrot));
+    slabCiz(P, E.dirsek, bilek, 21, 17, BASKI);
+
+    /* Servo 4/5 (Wrist Flex + Roll) — gövdesi bilekte */
+    slabCiz(P, vEkle(bilek, vCarp(dirYon, -20)), vEkle(bilek, vCarp(dirYon, 20)), 21, 21, SERVO);
+
+    /* Servo 6 (Gripper): iki çene, açıklığı kıskaç değerinden gelir */
+    const acik = 6 + AXES.find(a => a.id === "servo6").a * .18;
+    const yanYon = vBirim(vCapraz(dirYon, K.ileri));
+    for (const yon of [1, -1]) {
+      const off = vCarp(yanYon, yon * acik);
+      slabCiz(P, vEkle(bilek, off), vEkle(vEkle(bilek, vCarp(dirYon, 46)), off), 5, 11, BASKI);
     }
 
-    /* torç ucu + ark */
-    if (cam === "torc") {
-      const tx = done, ty = cy + seamY(done, t);
-      ctx.save();
-      ctx.translate(tx, ty);
-      ctx.rotate(-0.42);
-      ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(9, 0); ctx.lineTo(20, -74); ctx.lineTo(-20, -74); ctx.closePath();
-      const tg = ctx.createLinearGradient(0, -74, 0, 0);
-      tg.addColorStop(0, "#2A343A"); tg.addColorStop(1, "#4C5A61");
-      ctx.fillStyle = tg; ctx.fill();
-      ctx.strokeStyle = "#0A1014"; ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.restore();
+    /* kıskacın tuttuğu elektrot */
+    slabCiz(P, bilek, E.uc, 4.5, 4.5, [188, 176, 150]);
+  }
 
-      if (state.arkAktif && !state.acilDurdu) {
-        const fl = REDUCED ? .86 : .72 + Math.sin(t * .05) * .14 + Math.random() * .18;
-        const ag = ctx.createRadialGradient(tx, ty, 0, tx, ty, 86 * fl);
-        ag.addColorStop(0,   `rgba(255,246,224,${.95 * fl})`);
-        ag.addColorStop(.14, `rgba(255,196,96,${.72 * fl})`);
-        ag.addColorStop(.42, `rgba(255,138,31,${.26 * fl})`);
-        ag.addColorStop(1,   "rgba(255,138,31,0)");
-        ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(tx, ty, 86 * fl, 0, 7); ctx.fill();
-        for (let i = 0; i < (REDUCED ? 0 : 7); i++) {       /* kıvılcım */
-          const a = Math.random() * Math.PI, d = Math.random() * 46;
-          ctx.fillStyle = `rgba(255,${180 + Math.random() * 60 | 0},90,${.8 - d / 60})`;
-          ctx.fillRect(tx + Math.cos(a) * d, ty + Math.sin(a) * d * .5, 1.6, 1.6);
-        }
-      }
+  /* ── torç ── */
+  const nrm = dikisNormal(ilerlemeX(state.torc3d.x));
+  const egim = state.torc3d.aci;
+  /* X bileşeni negatif: ekran sağı dünya -X olduğu için sağa eğme sağa eğsin */
+  const eksen = vBirim([-Math.sin(egim) * .9, nrm[1] * Math.cos(egim), nrm[2] * Math.cos(egim) + .18]);
+  const arka = vEkle(uc, vCarp(eksen, 165));
+  const yan = vBirim(vCapraz(eksen, K.ileri));
+  const kose = [
+    P(vEkle(uc,  vCarp(yan,  9))), P(vEkle(arka, vCarp(yan,  22))),
+    P(vEkle(arka, vCarp(yan, -22))), P(vEkle(uc,  vCarp(yan, -9))),
+  ];
+  if (kose.every(Boolean)) {
+    ctx.beginPath();
+    kose.forEach((q, k) => k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y));
+    ctx.closePath();
+    const tg = ctx.createLinearGradient(kose[1].x, kose[1].y, kose[0].x, kose[0].y);
+    tg.addColorStop(0, suRengi(40, 52, 60, kose[1].z));
+    tg.addColorStop(1, suRengi(96, 112, 122, kose[0].z));
+    ctx.fillStyle = tg; ctx.fill();
+    ctx.strokeStyle = "rgba(6,12,16,.85)"; ctx.lineWidth = 1.2; ctx.stroke();
+  }
+
+  /* ── ark ── */
+  if (state.arkAktif && !state.acilDurdu && Math.abs(state.torc3d.yuk) < 26 && ucP) {
+    const fl = REDUCED ? .86 : .72 + Math.sin(t * .05) * .14 + Math.random() * .18;
+    const rad = Math.max(24, 150 * ucP.k) * fl;
+    const ag = ctx.createRadialGradient(ucP.x, ucP.y, 0, ucP.x, ucP.y, rad);
+    ag.addColorStop(0,   `rgba(255,246,224,${.95 * fl})`);
+    ag.addColorStop(.14, `rgba(255,196,96,${.72 * fl})`);
+    ag.addColorStop(.42, `rgba(255,138,31,${.26 * fl})`);
+    ag.addColorStop(1,   "rgba(255,138,31,0)");
+    ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(ucP.x, ucP.y, rad, 0, 7); ctx.fill();
+    for (let i = 0; i < (REDUCED ? 0 : 8); i++) {
+      const a = Math.random() * Math.PI, d = Math.random() * rad * .5;
+      ctx.fillStyle = `rgba(255,${180 + Math.random() * 60 | 0},90,${.85 - d / rad})`;
+      ctx.fillRect(ucP.x + Math.cos(a) * d, ucP.y + Math.sin(a) * d * .55, 1.8, 1.8);
     }
   }
-  ctx.restore();
 
-  /* askıda katı madde (deniz karı) */
+  /* ── askıda katı madde ── */
   for (const p of snow) {
     if (!REDUCED) { p.y -= p.vy * 0.0016; if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); } }
     const r = .5 + p.z * 1.9;
@@ -1307,67 +1927,279 @@ function drawScene(t) {
     ctx.beginPath(); ctx.arc(p.x * W, p.y * H, r, 0, 7); ctx.fill();
   }
 
-  /* bulanıklık + vinyet */
+  /* ── bulanıklık + vinyet ── */
   ctx.fillStyle = `rgba(24,58,66,${.04 + bulanik * .17})`; ctx.fillRect(0, 0, W, H);
   const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .34, W / 2, H / 2, Math.max(W, H) * .8);
   vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
   ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
 
   if (state.acilDurdu) { ctx.fillStyle = "rgba(120,10,6,.18)"; ctx.fillRect(0, 0, W, H); }
+
+  /* otonom katman kutuları aynı projeksiyondan beslenir */
+  state._P = P; state._kam = kam;
 }
 
 /* ══════════════ 8. JOYSTICK PEDLERİ ══════════════ */
 /* Operatörün komutu (turuncu halka) ile kolun gerçekte ulaştığı nokta
    (mavi nokta) arasındaki fark, geri bildirim mekanizmasının kendisidir. */
+/* Ped gerçek bir joystick gibi davranır: bırakınca yayla merkeze döner.
+   Verdiği şey bir HIZ komutudur — ittiğin yönde torç ilerler, bıraktığında
+   çubuk merkeze döner ama torç vardığı yerde kalır. Turuncu halka (komut) ile
+   mavi nokta (kolun ulaştığı) arasındaki mesafe geri bildirimin kendisidir. */
 function bindPad(el, kx, ky, out) {
-  const cmd = $(".cmd", el), act = $(".act", el);
+  const cmd = $(".cmd", el), act = $(".act", el), link = $(".link line", el);
   let dragging = false;
 
-  const set = e => {
+  /* Koruma alarmı arkı keser ama kolu SERBEST bırakır — operatörün torcu
+     dikişten geri çekebilmesi gerekir. Yalnızca acil durdurma dondurur. */
+  const kilitli = () => state.mod !== "op" || state.acilDurdu || state.giris !== "joystick";
+
+  const set = (cx, cy) => {
     const r = el.getBoundingClientRect();
-    state.komut[kx] = clamp((e.clientX - r.left) / r.width  * 2 - 1, -1, 1);
-    state.komut[ky] = clamp((e.clientY - r.top)  / r.height * 2 - 1, -1, 1);
+    if (!r.width) return;
+    state.komut[kx] = clamp((cx - r.left) / r.width  * 2 - 1, -1, 1);
+    state.komut[ky] = clamp((cy - r.top)  / r.height * 2 - 1, -1, 1);
+    el.classList.add("touched");
   };
+
   el.addEventListener("pointerdown", e => {
-    if (state.mod !== "op" || state.acilDurdu) return;
-    dragging = true; el.classList.add("touched");
-    el.setPointerCapture(e.pointerId); set(e);
+    if (kilitli()) return;
+    dragging = true;
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    set(e.clientX, e.clientY);
+    e.preventDefault();
   });
-  el.addEventListener("pointermove", e => { if (dragging) set(e); });
-  const release = () => { dragging = false; };
-  el.addEventListener("pointerup", release);
-  el.addEventListener("pointercancel", release);
+  /* takip pencere düzeyinde: imleç pedin dışına çıksa da sürükleme kopmaz */
+  window.addEventListener("pointermove", e => { if (dragging) set(e.clientX, e.clientY); });
+  window.addEventListener("pointerup",     () => { dragging = false; });
+  window.addEventListener("pointercancel", () => { dragging = false; });
 
   return () => {                                   // her karede çağrılır
-    if (!dragging) {                               // yay merkezleme
-      state.komut[kx] = lerp(state.komut[kx], 0, .12);
-      state.komut[ky] = lerp(state.komut[ky], 0, .12);
+    /* Yay merkezleme yalnızca oto merkezleme açıkken. Kapalıyken joystick
+       bırakıldığı yerde kalır — sabit hızda ilerlemek için. */
+    if (!dragging && state.giris === "joystick" && state.otoMerkez) {
+      state.komut[kx] = Math.abs(state.komut[kx]) < .004 ? 0 : lerp(state.komut[kx], 0, .16);
+      state.komut[ky] = Math.abs(state.komut[ky]) < .004 ? 0 : lerp(state.komut[ky], 0, .16);
     }
     const gain = state.acilDurdu ? 0 : 1;
-    state.gercek[kx] = lerp(state.gercek[kx], state.komut[kx] * gain, .085);
-    state.gercek[ky] = lerp(state.gercek[ky], state.komut[ky] * gain, .085);
+    state.gercek[kx] = lerp(state.gercek[kx], state.komut[kx] * gain, .13);
+    state.gercek[ky] = lerp(state.gercek[ky], state.komut[ky] * gain, .13);
 
-    cmd.style.left = `${(state.komut[kx] + 1) / 2 * 100}%`;
-    cmd.style.top  = `${(state.komut[ky] + 1) / 2 * 100}%`;
-    act.style.left = `${(state.gercek[kx] + 1) / 2 * 100}%`;
-    act.style.top  = `${(state.gercek[ky] + 1) / 2 * 100}%`;
-    out.textContent = `${state.gercek[kx] >= 0 ? " " : "−"}${Math.abs(state.gercek[kx]).toFixed(2)} ` +
-                      `${state.gercek[ky] >= 0 ? " " : "−"}${Math.abs(state.gercek[ky]).toFixed(2)}`;
+    const cx = (state.komut[kx]  + 1) / 2 * 100, cy = (state.komut[ky]  + 1) / 2 * 100;
+    const ax = (state.gercek[kx] + 1) / 2 * 100, ay = (state.gercek[ky] + 1) / 2 * 100;
+    cmd.style.left = `${cx}%`; cmd.style.top = `${cy}%`;
+    act.style.left = `${ax}%`; act.style.top = `${ay}%`;
+    link.setAttribute("x1", `${cx}%`); link.setAttribute("y1", `${cy}%`);
+    link.setAttribute("x2", `${ax}%`); link.setAttribute("y2", `${ay}%`);
+    const f = v => `${v >= 0 ? " " : "−"}${Math.abs(v).toFixed(2)}`;
+    out.textContent = `${f(state.gercek[kx])} ${f(state.gercek[ky])}`;
   };
 }
 const tickPadL = bindPad($("#pad-l"), "lx", "ly", $("#pad-l-val"));
 const tickPadR = bindPad($("#pad-r"), "rx", "ry", $("#pad-r-val"));
+/* Joystick zaten yayla merkeze döndüğü için bu düğme KOLU ev pozuna çağırır. */
+const EV_POZU = { servo1: 0, servo2: -46, servo3: 0, servo4: 0, servo5: 63, servo6: 38 };
+function evPozu() {
+  komutuSifirla();
+  for (const a of AXES) a.t = EV_POZU[a.id];
+  state.torc3d.yuk = 0;
+  gunlukEkle("oto", "Kol ev pozuna çağrıldı — torç dikişe indirildi");
+}
+$("#center").addEventListener("click", evPozu);
 
-/* komut → eklem hedefi eşlemesi */
+/* Oto merkezleme anahtarı: kapalıyken joystick de klavye de bırakıldığı
+   komutu korur, kol sabit hızda ilerlemeye devam eder. */
+$("#autocenter").addEventListener("click", e => {
+  state.otoMerkez = !state.otoMerkez;
+  e.currentTarget.dataset.on = String(state.otoMerkez);
+  e.currentTarget.textContent = `Oto merkez · ${state.otoMerkez ? "açık" : "kapalı"}`;
+  if (state.otoMerkez) komutuSifirla();
+  gunlukEkle("oto", state.otoMerkez
+    ? "Oto merkezleme açık — kumanda bırakılınca kol durur"
+    : "Oto merkezleme kapalı — kumanda bırakılan komutu korur");
+});
+
+/* ══════════════ 8b. PWM ÇIKIŞI ══════════════ */
+/* Servo sürüş oranı: joystick komutunun kola ne kadarının geçtiğini belirler.
+   Düşürünce kol yavaşlar — hassas dikiş takibi için. */
+function renderPwm() {
+  const box = $("#pwm-box");
+  $("#pwm-val").textContent = `%${state.pwm}`;
+  $("#pwm-us").textContent  = `${1000 + state.pwm * 10} µs`;
+  box.dataset.low = String(state.pwm < 20);
+  box.style.setProperty("--fill", `${state.pwm}%`);
+}
+$("#pwm").addEventListener("input", e => {
+  state.pwm = +e.target.value;
+  renderPwm();
+});
+
+/* ══════════════ 8c. GİRİŞ KAYNAĞI: JOYSTICK / KLAVYE ══════════════ */
+const TUSLAR = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"]);
+const basili = new Set();
+
+function tuslariBoya() {
+  $$("kbd[data-k]").forEach(k => k.classList.toggle("on", basili.has(k.dataset.k)));
+}
+
+function girisAyarla(g) {
+  if (state.giris === g) return;
+  state.giris = g;
+  basili.clear(); tuslariBoya();
+  komutuSifirla();
+  $$(".intab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.giris === g)));
+  /* Yalnızca seçili giriş kaynağının arayüzü görünür. */
+  $("#pads").hidden    = g !== "joystick";
+  $("#keymap").hidden  = g !== "klavye";
+  $("#keyhint").hidden = g !== "klavye";
+  $("#mousepad").hidden = g !== "klavye";
+  gunlukEkle("oto", g === "klavye"
+    ? "Giriş kaynağı klavyeye alındı — WASD ve ok tuşları etkin"
+    : "Giriş kaynağı joystick pedlerine alındı");
+}
+$$(".intab").forEach(b => b.addEventListener("click", () => girisAyarla(b.dataset.giris)));
+
+window.addEventListener("keydown", e => {
+  if (state.giris !== "klavye" || state.mod !== "op") return;
+  if (/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (TUSLAR.has(k)) { basili.add(k); tuslariBoya(); e.preventDefault(); return; }
+  if (k === " ") {
+    basili.add(k); tuslariBoya(); e.preventDefault();
+    if (state.arkAktif) arkiSondur("operatör tetiği bırakıldı");
+    else arkiTutustur("operatör tetiği · klavye");
+  } else if (k === "h") {
+    basili.add(k); tuslariBoya(); e.preventDefault(); evPozu();
+  }
+});
+window.addEventListener("keyup", e => { basili.delete(e.key.toLowerCase()); tuslariBoya(); });
+window.addEventListener("blur", () => { basili.clear(); tuslariBoya(); });
+
+/* Klavye modunda 5. ve 6. eksen faredir: yatay → torç açısı (Servo 5),
+   dikey → kıskaç (Servo 6). Bunlar poz eksenleri olduğu için hız değil
+   KONUM komutu verir — fare nereye giderse eksen oraya gider. */
+const mpad = $("#mpad"), mdot = $(".mdot", mpad);
+let fareTutuldu = false;
+
+/* Nokta ancak TUTULUP sürüklenerek oynar. Pedin boş yerine tıklamak değeri
+   sıçratmaz ve üstünden geçmek hiçbir şey yapmaz — yanlışlıkla kıskacı açıp
+   torcu düşürmemek için. */
+function fareOku(e) {
+  const r = mpad.getBoundingClientRect();
+  if (!r.width) return;
+  state.fare.x = clamp((e.clientX - r.left) / r.width, 0, 1);
+  state.fare.y = clamp((e.clientY - r.top) / r.height, 0, 1);
+  mpad.classList.add("touched");
+}
+const TUTMA_YARICAP = 22;   // px — noktayı yakalama alanı
+
+mpad.addEventListener("pointerdown", e => {
+  if (state.giris !== "klavye" || state.acilDurdu) return;
+  const r = mpad.getBoundingClientRect();
+  const dx = e.clientX - (r.left + state.fare.x * r.width);
+  const dy = e.clientY - (r.top  + state.fare.y * r.height);
+  if (Math.hypot(dx, dy) > TUTMA_YARICAP) return;      // noktayı tutmadın
+  fareTutuldu = true;
+  mpad.classList.add("touched", "tutuluyor");
+  try { mpad.setPointerCapture(e.pointerId); } catch (_) {}
+  e.preventDefault();
+});
+window.addEventListener("pointermove", e => { if (fareTutuldu) fareOku(e); });
+const fareBirak = () => { fareTutuldu = false; mpad.classList.remove("tutuluyor"); };
+window.addEventListener("pointerup", fareBirak);
+window.addEventListener("pointercancel", fareBirak);
+
+function renderFare() {
+  if (state.giris !== "klavye") return;
+  mdot.style.left = `${state.fare.x * 100}%`;
+  mdot.style.top  = `${state.fare.y * 100}%`;
+  const s5 = AXES.find(a => a.id === "servo5").a;
+  const s6 = AXES.find(a => a.id === "servo6").a;
+  /* kıskaç fazla açıksa torç düşebilir — okumayı uyarı rengine çevir */
+  const gevsek = s6 > 75;   // bu açıklıktan sonra torç kıskaçtan kayabilir
+  const el = $("#mouse-val");
+  el.classList.toggle("uyari", gevsek);
+  el.textContent = `${s5.toFixed(1)}° ${s6.toFixed(0)}%${gevsek ? " · gevşek" : ""}`;
+}
+
+/* Basılı tuşları komuta çevirir — joystick'in yayı gibi, bırakınca merkeze döner. */
+function klavyeKomutu() {
+  if (state.giris !== "klavye") return;
+  const on = k => basili.has(k) ? 1 : 0;
+  const hedef = {
+    lx: on("d") - on("a"),
+    ly: on("s") - on("w"),
+    rx: on("arrowright") - on("arrowleft"),
+    ry: on("arrowdown") - on("arrowup"),
+  };
+  const oran = state.acilDurdu ? 0 : 1;
+  for (const eks of ["lx", "ly", "rx", "ry"]) {
+    /* oto merkezleme kapalıyken tuş bırakılınca komut olduğu yerde kalır */
+    if (!state.otoMerkez && hedef[eks] === 0) continue;
+    state.komut[eks] = lerp(state.komut[eks], hedef[eks] * oran, .18);
+  }
+}
+
+/* Komut → eklem hedefi ve torç konumu.
+   Joystick yaya döndüğü için komut bir HIZ'dır: hedefler integre edilir, yani
+   çubuğu bıraktığında kol vardığı pozu korur.
+   Eşlemeyi değiştirmek istersen tek yer burası. */
 function komutuEksenlereYaz() {
   const k = state.komut, ax = id => AXES.find(a => a.id === id);
-  ax("omuz").t   = clamp(k.lx * 62, -90, 90);
-  ax("dirsek").t = clamp(-46 + k.ly * 52, -120, 120);
-  ax("bilekD").t = clamp(k.rx * 96, -180, 180);
-  ax("bilekE").t = clamp(k.ry * 58, -90, 90);
+  /* PWM servo sürüş HIZINI ölçekler, erişilebilir menzili değil.
+     Bu ayrım önemli: integre edilen eksenler (servo 1-4, torcun dikiş boyunca
+     ilerlemesi) hız komutudur, PWM ile yavaşlar. Konum eşlemeleri (torç
+     yüksekliği, eğim, servo 5/6) tam menzilini korur — yoksa düşük PWM'de
+     torcu dikişten kaldırmak imkânsız olurdu. */
+  const serbest = state.acilDurdu ? 0 : 1;
+  const h = serbest * clamp(state.pwm / 100, 0, 1);
+
+  /* Yön kuralı: ped/tuş YUKARI iken ly,ry negatiftir (ekran koordinatı).
+     Kolun yukarı hareketi pozitif eklem açısı demek olduğundan burada
+     işaretleri çeviriyoruz — böylece W kolu kaldırır, S dikişe bastırır. */
+  ax("servo1").t = clamp(ax("servo1").t + k.lx * 1.1 * h, -90, 90);
+  ax("servo2").t = clamp(ax("servo2").t - k.ly * 1.0 * h, -120, 120);
+  ax("servo3").t = clamp(ax("servo3").t + k.rx * 1.6 * h, -180, 180);
+  ax("servo4").t = clamp(ax("servo4").t - k.ry * 1.0 * h, -90, 90);
+  /* Servo 5 ve 6: joystick modunda sağ pedden, klavye modunda fareden. */
+  if (state.giris === "klavye") {
+    ax("servo5").t = clamp(state.fare.x * 90, 0, 90);          // torç açısı
+    ax("servo6").t = clamp((1 - state.fare.y) * 100, 0, 100);  // kıskaç
+  } else {
+    ax("servo5").t = clamp(63 + k.rx * 22 * serbest, 0, 90);   // konum, PWM'siz
+  }
+
   for (const a of AXES) {
     a.a = lerp(a.a, a.t, state.acilDurdu ? .02 : .062) + (REDUCED ? 0 : (Math.random() - .5) * .1);
   }
+
+  /* torcu kadrajda sür */
+  const T = state.torc3d;
+  const slew = .12 * (.25 + .75 * clamp(state.pwm / 100, 0, 1));   // PWM slew hızı
+  T.x   = clamp(T.x + state.gercek.lx * .0045 * h, .06, .94);      // hız komutu
+  /* ly negatif = ped yukarı = torcu KALDIR. Aşağı bastırmak dikişe gömer,
+     onu da küçük bir payla sınırlıyoruz (kaynak banyosuna dalma). */
+  T.yuk = clamp(lerp(T.yuk, -state.gercek.ly * 44 * serbest, slew), -6, 46);
+  T.aci = lerp(T.aci, -.42 + state.gercek.rx * .55 * serbest, slew);
+
+  /* Kaynak izini işle: yalnızca ARK YANARKEN ve torç dikişe oturmuşken
+     torcun o karede geçtiği kovalar işaretlenir. İki kare arası hızlı
+     hareketse aradaki kovalar da doldurulur (nokta nokta iz kalmasın),
+     ama ark kesildiği anda zincir kopar — sonraki yakışta boşluk köprülenmez. */
+  const yakin = Math.abs(T.yuk) < 26;
+  const kaynatiyor = state.arkAktif && yakin && !state.acilDurdu;
+  if (kaynatiyor) {
+    const kova = f => clamp(Math.floor(f * DIKIS_BOLME), 0, DIKIS_BOLME - 1);
+    const i2 = kova(T.x);
+    const i1 = state.sonKaynakX == null ? i2 : kova(state.sonKaynakX);
+    for (let i = Math.min(i1, i2); i <= Math.max(i1, i2); i++) state.kaynakIzi[i] = 1;
+    state.sonKaynakX = T.x;
+  } else {
+    state.sonKaynakX = null;
+  }
+
+  /* torç dikişten kopunca ark söner — gerçek davranış, sessizce olmaz */
+  if (state.arkAktif && !yakin) arkiSondur("torç dikişten ayrıldı");
 }
 
 /* ══════════════ 9. MOD GEÇİŞİ ══════════════ */
@@ -1380,26 +2212,140 @@ function moduAyarla(m) {
   $("#det").hidden       = m !== "oto";
   $("#ai-badge").hidden  = m !== "oto";
   $("#retic").style.display = m === "oto" ? "none" : "";
-  gunlukEkle(m === "oto" ? "oto" : "ark",
-    m === "oto" ? "Otonom moda geçildi — dikiş takip düğümü devrede"
-                : "Kontrol operatöre devredildi — otonom düğüm beklemede");
+
+  if (m === "op") {
+    /* Devir teslim: otonom düğüm arkı bırakır. Operatör yeniden tutuşturana
+       kadar kaynak durur — kendiliğinden devam etmez. */
+    state.gorevDurdu = true;
+    state.arkAktif = false;
+    komutuSifirla();
+    gunlukEkle("ark", "Kontrol operatöre devredildi — otonom düğüm arkı bıraktı");
+  } else {
+    state.gorevDurdu = false;
+    gunlukEkle("oto", "Otonom moda geçildi — dikiş takip düğümü devrede");
+  }
+  renderArkDurumu();
 }
 $$(".mode").forEach(b => b.addEventListener("click", () => moduAyarla(b.dataset.mode)));
 $("#takeover").addEventListener("click", () => moduAyarla("op"));
 
 /* otonom katmandaki dikiş izi */
+/* Otonom katman artık 3B sahnenin projeksiyonundan beslenir: dikiş izi
+   borunun üstündeki gerçek eğriyi takip eder, tespit kutuları da onu sarar. */
 function seamIziCiz() {
-  if ($("#det").hidden || !W) return;
-  const z = state.zoom, t = performance.now(), pts = [];
-  for (let i = 0; i <= 20; i++) {
-    const x = W * (.31 + .38 * i / 20);
-    const y = H * .52 + seamY(x, t);
-    pts.push(`${W / 2 + (x - W / 2) * z},${H / 2 + (y - H / 2) * z}`);
+  if ($("#det").hidden || !W || !state._P) return;
+  const P = state._P, kam = state._kam;
+  const uc = torcUcu();
+  /* Ekran sağı dünya -X olduğu için torcun ÖNÜ küçük X'tir: bandı oraya kur.
+     Kamera penceresine ve boru boyuna da kırpıyoruz. */
+  const x1 = clamp(uc[0] + 70,  kam.xa, kam.xb);
+  const x0 = clamp(uc[0] - 500, kam.xa, kam.xb);
+  if (Math.abs(x1 - x0) < 40) { $("#det-dikis").hidden = $("#det-boru").hidden = true; return; }
+
+  const pts = [];
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (let i = 0; i <= 24; i++) {
+    const q = P(dikisNokta(x0 + (x1 - x0) * i / 24));
+    if (!q) continue;
+    pts.push(`${q.x.toFixed(1)},${q.y.toFixed(1)}`);
+    minX = Math.min(minX, q.x); maxX = Math.max(maxX, q.x);
+    minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y);
   }
+  if (pts.length < 2) { $("#det-dikis").hidden = $("#det-boru").hidden = true; return; }
   $("#seam-path").setAttribute("points", pts.join(" "));
+
+  /* kutular kadrajın dışına taşmasın — etiketler de görünür kalsın */
+  const kutu = (el, ex, ey) => {
+    const l = clamp(minX - ex, 2, W - 30), r = clamp(maxX + ex, 30, W - 2);
+    const u = clamp(minY - ey, 20, H - 30), a = clamp(maxY + ey, 40, H - 2);
+    el.hidden = (r - l < 24 || a - u < 16);
+    if (el.hidden) return;
+    el.style.left   = `${(l / W * 100).toFixed(2)}%`;
+    el.style.top    = `${(u / H * 100).toFixed(2)}%`;
+    el.style.width  = `${((r - l) / W * 100).toFixed(2)}%`;
+    el.style.height = `${((a - u) / H * 100).toFixed(2)}%`;
+  };
+  kutu($("#det-dikis"), 16, 16);
+  kutu($("#det-boru"), 52, 88);
 }
 
-/* ══════════════ 10. ACİL DURDURMA ══════════════ */
+/* ══════════════ 10. ARK DURUMU, KORUMA VE ACİL DURDURMA ══════════════ */
+/* Ark yalnızca üç yoldan yanar: operatörün tetiği, otonom görev, kilit açma.
+   Üç yoldan söner: tetik, mod devri, otomatik koruma / acil durdurma. */
+function arkKilitli() { return state.acilDurdu || !!state.alarm; }
+
+function renderArkDurumu() {
+  const c = $("#chip-arc");
+  c.dataset.s = state.arkAktif ? "arc" : (arkKilitli() ? "crit" : "warn");
+  c.classList.toggle("live", state.arkAktif);
+  c.lastChild.textContent = state.arkAktif ? "Ark aktif"
+                          : arkKilitli()   ? "Ark kesildi" : "Ark beklemede";
+  const t = $("#trigger");
+  t.dataset.on = String(state.arkAktif);
+  t.disabled = arkKilitli();
+  t.textContent = arkKilitli()   ? "Ark kilitli"
+                : state.arkAktif ? "Ark yanıyor — söndür"
+                                 : "Ark kapalı — tutuştur";
+}
+
+function arkiTutustur(kaynak) {
+  if (arkKilitli() || state.arkAktif) return false;
+  state.arkAktif = true;
+  state.torc.toplam++; state.torc.dalis++;
+  gunlukEkle("ark", `Ark tutuşturuldu — ${kaynak}, elektrot ${state.torc.elektrot}`);
+  renderArkDurumu(); return true;
+}
+function arkiSondur(sebep) {
+  if (!state.arkAktif) { renderArkDurumu(); return; }
+  state.arkAktif = false;
+  gunlukEkle("ark", `Ark söndürüldü — ${sebep}`);
+  renderArkDurumu();
+}
+
+/* Eşiği aşan bir sensör arkı otomatik keser ve alarmı kaldırır. */
+function otomatikKoruma(sebep) {
+  if (state.alarm) return;
+  state.alarm = sebep;
+  state.arkAktif = false;
+  state.gorevDurdu = true;
+  $("#alarm").hidden = false;
+  $("#alarm-msg").textContent = `${sebep} — görev duraklatıldı, kol serbest: torcu geri çek`;
+  gunlukEkle("uyari", `KORUMA DEVREDE — ${sebep}, ark kesildi`);
+  renderArkDurumu();
+}
+
+/* Sıfırlama yalnızca koşul geçtiyse kabul edilir. */
+function alarmSifirla() {
+  const asan = kritikSensor();
+  if (asan) {
+    $("#alarm-msg").textContent =
+      `Sıfırlanamaz: ${asan.l} hâlâ sınırda (${asan.v.toFixed(asan.d)} ${asan.u}) — soğuması bekleniyor`;
+    return;
+  }
+  state.alarm = null;
+  state.gorevDurdu = false;
+  $("#alarm").hidden = true;
+  gunlukEkle("ark", "Koruma sıfırlandı — sistem hazır, ark beklemede");
+  renderArkDurumu();
+}
+
+/* Sınırı aşan ilk sensörü döndürür (yoksa null). */
+function kritikSensor() {
+  for (const grp of SENSORS) for (const s of grp.items) {
+    if (!s.kes || s.v == null) continue;
+    if (s.crit != null && s.v >= s.crit) return s;
+    if (s.lowCrit != null && s.v <= s.lowCrit) return s;
+  }
+  return null;
+}
+
+$("#alarm-reset").addEventListener("click", alarmSifirla);
+
+$("#trigger").addEventListener("click", () => {
+  if (state.arkAktif) arkiSondur("operatör tetiği bırakıldı");
+  else arkiTutustur("operatör tetiği");
+});
+
 $("#estop").addEventListener("click", () => {
   state.acilDurdu = !state.acilDurdu;
   const b = $("#estop");
@@ -1407,25 +2353,24 @@ $("#estop").addEventListener("click", () => {
   b.textContent = state.acilDurdu ? "Kilidi aç" : "Acil durdur";
   if (state.acilDurdu) {
     state.arkAktif = false;
-    $("#chip-arc").dataset.s = "crit";
-    $("#chip-arc").classList.remove("live");
-    $("#chip-arc").lastChild.textContent = "Ark kapalı";
-    gunlukEkle("uyari", "ACİL DURDURMA — ark söndürüldü, eklemler frenlendi");
+    state.gorevDurdu = true;
+    gunlukEkle("uyari", "ACİL DURDURMA — ark kesildi, eklemler frenlendi");
   } else {
-    state.arkAktif = true;
-    $("#chip-arc").dataset.s = "arc";
-    $("#chip-arc").classList.add("live");
-    $("#chip-arc").lastChild.textContent = "Ark aktif";
-    gunlukEkle("ark", "Kilit açıldı — sistem hazır, ark yeniden tutuşturuldu");
+    state.gorevDurdu = false;
+    gunlukEkle("ark", "Kilit açıldı — sistem hazır, ark beklemede (tetik operatörde)");
   }
+  renderArkDurumu();
 });
 
 /* ══════════════ 11. KAMERA KONTROLLERİ ══════════════ */
-const CAM_AD = { torc: "TORÇ KAMERASI", on: "ÖN KAMERA", alt: "ALT KAMERA" };
+/* İki kamera aynı 3B sahneye bakar; farkları aktifKamera() içindeki göz ve
+   hedef noktalarıdır. ROV kameraları eklenirken oraya yeni bir giriş yeter. */
+const CAM_AD = { torc: "TORÇ KAMERASI", kol: "KOL KAMERASI · 3. ŞAHIS" };
 $$(".camtab").forEach(b => b.addEventListener("click", () => {
   $$(".camtab").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   state.kamera = b.dataset.cam;
   $("#cam-name").textContent = CAM_AD[state.kamera];
+  gunlukEkle("oto", `Görüntü kaynağı: ${CAM_AD[state.kamera].toLowerCase()}`);
 }));
 $("#light").addEventListener("input", e => {
   state.isik = +e.target.value; $("#light-out").textContent = `${state.isik}%`; renderHud();
@@ -1433,8 +2378,29 @@ $("#light").addEventListener("input", e => {
 $("#zoom").addEventListener("input", e => {
   state.zoom = +e.target.value / 10; $("#zoom-out").textContent = `${state.zoom.toFixed(1)}×`;
 });
-$("#snap").addEventListener("click", () => gunlukEkle("oto", `Kare yakalandı — ${CAM_AD[state.kamera].toLowerCase()}, 18.4 m`));
-$("#markbtn").addEventListener("click", () => gunlukEkle("oto", "İşaret bırakıldı — dikiş 3, konum 124 mm"));
+$("#snap").addEventListener("click", () => gunlukEkle("oto",
+  `Kare yakalandı — ${CAM_AD[state.kamera].toLowerCase()}, ${state.isaretler.length} işaret kadrajda`));
+
+/* Kayıt anahtarı: durdurunca HUD göstergesi söner ve sayaç durur. */
+$("#recbtn").addEventListener("click", e => {
+  state.kayit = !state.kayit;
+  e.currentTarget.dataset.on = String(state.kayit);
+  e.currentTarget.firstChild.textContent = state.kayit ? "Kaydı durdur" : "Kayıt başlat";
+  $("#rec").dataset.on = String(state.kayit);
+  $("#rec").firstChild.textContent = state.kayit ? "KAYIT " : "BEKLEMEDE ";
+  gunlukEkle("oto", state.kayit ? "Video kaydı başlatıldı" : "Video kaydı durduruldu");
+});
+
+/* İşaret bırak: torcun o anki dikiş konumuna kalıcı bir nişan koyar.
+   İşaretler 3B sahnede boru üzerinde çizilir ve numaralanır — kaynak
+   sonrası denetlenecek noktaları saklamak için. */
+$("#markbtn").addEventListener("click", () => {
+  const f = state.torc3d.x;
+  const mm = Math.round(f * 320);
+  state.isaretler.push({ f, mm, saat: saat(), elektrot: state.torc.elektrot });
+  $("#mark-say").textContent = state.isaretler.length;
+  gunlukEkle("oto", `İşaret ${state.isaretler.length} bırakıldı — dikiş ${mm} mm, elektrot ${state.torc.elektrot}`);
+});
 
 /* ══════════════ 12. OLAY GÜNLÜĞÜ ══════════════ */
 function saat(d = new Date()) {
@@ -1470,8 +2436,15 @@ function SimSource() {
     gurultu(sen("derinlik"), .06); gurultu(sen("suSic"), .04);
     sen("basinc").v = 1 + sen("derinlik").v / 10.2;
     gurultu(sen("bulanik"), .05);
-    sen("icSic").v = clamp(sen("icSic").v + (state.arkAktif ? .035 : -.05)
-                            + (Math.random() - .5) * .18, 0, 80);
+    /* sonar: torcun iş yüzeyine uzaklığı (torç yüksekliği + taban mesafe) */
+    sen("uzaklik").v = clamp(lerp(sen("uzaklik").v,
+      16 + Math.abs(state.torc3d.yuk) * .9 + (Math.random() - .5) * .5, .25), 0, 120);
+    /* Termal model: ark yanarken gövde ısınır, sönünce su sıcaklığına doğru
+       soğur. Sınır aşılırsa koruma devreye girer (aşağıda). */
+    const su = sen("suSic").v, isi = sen("icSic");
+    const isiHedef = state.arkAktif ? 74 : su + 9;
+    isi.v = clamp(isi.v + (isiHedef - isi.v) * (state.arkAktif ? .0016 : .006)
+                  + (Math.random() - .5) * .06, 0, 90);
     gurultu(sen("nem"), .2);
     sen("batarya").v = clamp(sen("batarya").v - .0016, 0, 100);
     gurultu(sen("hatVolt"), .06); gurultu(sen("cekilen"), .12);
@@ -1479,15 +2452,22 @@ function SimSource() {
     sen("yunus").v  =  4.8 + state.gercek.ly * 4 + (Math.random() - .5) * .3;
     sen("yon").v    = (sen("yon").v + state.gercek.rx * .8 + 360) % 360;
 
+    const torcHedef = state.arkAktif ? 96 : su + 4;
+    sen("torcSic").v = clamp(sen("torcSic").v + (torcHedef - sen("torcSic").v)
+                             * (state.arkAktif ? .004 : .012), 0, 150);
+
     if (state.arkAktif) {
       gurultu(sen("kayAkim"), 7); gurultu(sen("arkVolt"), .35);
-      gurultu(sen("telHiz"), .12); gurultu(sen("torcSic"), .5);
+      gurultu(sen("telHiz"), .12);
     } else {
       sen("kayAkim").v = lerp(sen("kayAkim").v, 0, .25);
       sen("arkVolt").v = lerp(sen("arkVolt").v, 0, .25);
       sen("telHiz").v  = lerp(sen("telHiz").v, 0, .25);
-      sen("torcSic").v = lerp(sen("torcSic").v, 22, .01);
     }
+
+    /* sınır denetimi — arkı otomatik kesen tek yer */
+    const asan = kritikSensor();
+    if (asan) otomatikKoruma(asan.kes);
 
     state.akimGecmisi.push(sen("kayAkim").v); state.akimGecmisi.shift();
     state.gecikme = Math.round(clamp(state.gecikme + (Math.random() - .5) * 4, 18, 62));
@@ -1501,13 +2481,27 @@ function SimSource() {
   }, 100);
 
   setInterval(() => {                                   /* saniyelik sayaçlar */
-    if (state.arkAktif) state.torc.sure++;
-    state.sayac.kayit++; state.sayac.calisma++;
+    if (state.arkAktif) {
+      state.torc.sure++;
+      /* ömür yalnızca ark yanarken tükenir */
+      state.omur = Math.max(0, state.omur - torcOmruTahmini(omurKosulu()).hiz);
+      if (state.omur === 0) {
+        arkiSondur("elektrot tükendi");
+        state.torc.elektrot = Math.min(state.torc.elektrot + 1, state.torc.elektrotTop);
+        state.omur = 1;
+        gunlukEkle("uyari", `Elektrot değişimi — ${state.torc.elektrot}/${state.torc.elektrotTop}, yeni çubuk takıldı`);
+      }
+    }
+    if (state.kayit) state.sayac.kayit++;
+    state.sayac.calisma++;
     const hms = s => [s / 3600 | 0, s / 60 % 60 | 0, s % 60].map(n => String(n | 0).padStart(2, "0")).join(":");
     $("#rec-time").textContent = hms(state.sayac.kayit);
     $("#uptime").textContent   = hms(state.sayac.calisma);
     $("#net-rate").textContent = `${(18.4 + (Math.random() - .5) * 1.2).toFixed(1)} Mb/s`;
     $("#net-loss").textContent = `${(Math.random() * .06).toFixed(2)}%`;
+    const kaynakli = state.kaynakIzi.reduce((t, v) => t + v, 0) / DIKIS_BOLME;
+    $("#step-run").textContent =
+      `%${(kaynakli * 100).toFixed(0)} · ${(kaynakli * 320).toFixed(0)} / 320 mm`;
     if ($("#panel-oto").hidden === false) {
       $("#ai-fps").innerHTML = `${(27 + Math.random() * 3).toFixed(0)}<span class="u">fps</span>`;
       $("#ai-ms").innerHTML  = `${(30 + Math.random() * 9).toFixed(0)}<span class="u">ms</span>`;
@@ -1519,12 +2513,13 @@ function SimSource() {
     }
   }, 1000);
 
-  setInterval(() => {                                   /* yeni ark / elektrot */
-    if (!state.arkAktif) return;
-    state.torc.toplam++; state.torc.dalis++;
-    if (state.torc.toplam % 4 === 0) state.torc.elektrot = Math.min(state.torc.elektrot + 1, state.torc.elektrotTop);
-    gunlukEkle("ark", `Ark başlatıldı — elektrot ${state.torc.elektrot}, ${sen("kayAkim").v.toFixed(0)} A`);
-  }, 21000);
+  /* Paso döngüsü: SADECE otonom modda ve görev duraklatılmamışken kendiliğinden
+     yeni ark tutuşur. Operatör modunda ark tetiği operatördedir. */
+  setInterval(() => {
+    if (state.mod !== "oto" || state.gorevDurdu || arkKilitli()) return;
+    if (state.arkAktif) arkiSondur("paso tamamlandı");
+    else arkiTutustur("otonom görev");
+  }, 12000);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -1561,7 +2556,8 @@ function SimSource() {
 
 /* ══════════════ 14. ANA DÖNGÜ ══════════════ */
 function loop(t) {
-  tickPadL(); tickPadR();
+  klavyeKomutu();
+  tickPadL(); tickPadR(); renderFare();
   komutuEksenlereYaz();
   renderAxes(); renderForce();
   drawScene(t);
@@ -1570,7 +2566,8 @@ function loop(t) {
 }
 
 resizeCanvas();
-renderSensors(); renderAxes(); renderTorch(); renderSpark(); renderForce(); renderHud();
+renderSensors(); renderAxes(); renderTorch(); renderSpark(); renderForce();
+renderOmur(); renderHud(); renderArkDurumu(); renderPwm();
 SimSource();
 requestAnimationFrame(loop);
 </script>
